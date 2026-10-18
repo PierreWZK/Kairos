@@ -75,6 +75,13 @@ class Company
     #[ORM\Column]
     private bool $isSuspended = false;
 
+    /**
+     * Entreprise de démonstration (App\Demo\DemoData), recréée chaque nuit par app:demo:reset.
+     * Ses comptes sont publics : ce qui bloquerait les visiteurs suivants ou enverrait des e-mails y est désactivé.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isDemo = false;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
@@ -229,6 +236,18 @@ class Company
     public function setTimezone(?string $timezone): static
     {
         $this->timezone = $timezone ?? '';
+
+        return $this;
+    }
+
+    public function isDemo(): bool
+    {
+        return $this->isDemo;
+    }
+
+    public function setIsDemo(bool $isDemo): static
+    {
+        $this->isDemo = $isDemo;
 
         return $this;
     }

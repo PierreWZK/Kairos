@@ -5,8 +5,20 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    # En production, le proxy de Coolify (Traefik) termine le HTTPS : Symfony lit ses en-têtes X-Forwarded-*
+    # pour savoir que la page est en https (liens des e-mails, cookies sécurisés). Voir TRUSTED_PROXIES.
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
     #esi: true
     #fragments: true
+
+# Sessions dans var/share (un volume en production) : personne n'est déconnecté à chaque mise à jour
+when@prod:
+    framework:
+        session:
+            handler_id: session.handler.native_file
+            save_path: '%kernel.share_dir%/sessions'
 
 when@test:
     framework:

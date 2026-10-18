@@ -29,7 +29,10 @@ final class ShowcaseTest extends WebTestCase
 
     public function testTheShowcaseListsTheDemoCompaniesThatExist(): void
     {
-        $this->createAgenda();
+        $this->createAgenda()->getCompany()->setIsDemo(true);
+        $this->entityManager()->flush();
+        // Une vraie entreprise inscrite n'est pas une démo
+        $this->createCompany('Cabinet Équilibre', 'cabinet-equilibre');
 
         $this->client->request('GET', '/');
 
@@ -37,6 +40,7 @@ final class ShowcaseTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Votre agenda en ligne');
         self::assertSelectorExists('#demos a[href="/salon-lumiere"]');
         self::assertSelectorNotExists('#demos a[href="/cabinet-equilibre"]');
+        self::assertSelectorTextContains('.demo-accounts', 'julie@salon-lumiere.test');
         // Le code d'intégration d'exemple, affiché comme du texte
         self::assertSelectorTextContains('#integration .code', '<div data-kairos="http://localhost/integration/salon-lumiere">');
         self::assertSelectorTextContains('#integration .code', '<script src="http://localhost/embed.js" async></script>');

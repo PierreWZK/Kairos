@@ -19,12 +19,16 @@
 
     <section>
         <h2 class="section-title">Mot de passe</h2>
-        {{ form_start(password, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
-            {{ form_row(password.currentPassword) }}
-            {{ form_row(password.plainPassword.first) }}
-            {{ form_row(password.plainPassword.second) }}
-            <button type="submit" class="button button-primary">Changer le mot de passe</button>
-        {{ form_end(password) }}
+        {% if company.demo %}
+            <p class="empty">Le mot de passe d'un compte de démonstration ne change pas : d'autres visiteurs l'utilisent.</p>
+        {% else %}
+            {{ form_start(password, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+                {{ form_row(password.currentPassword) }}
+                {{ form_row(password.plainPassword.first) }}
+                {{ form_row(password.plainPassword.second) }}
+                <button type="submit" class="button button-primary">Changer le mot de passe</button>
+            {{ form_end(password) }}
+        {% endif %}
     </section>
 </div>
 {% endblock %}

@@ -1,0 +1,121 @@
+# ---------------------------------------------------------------------------
+# Kairos · intégration et déploiement continus
+#
+# CI : à chaque push et pull request, les tests tournent sur PHP 8.4 + MySQL 8.4,
+#      et l'image Docker de production est construite (sans être publiée).
+# CD : sur main uniquement, et seulement si tout passe, Coolify redéploie le site
+#      (son déploiement automatique sur push est désactivé : c'est ce workflow qui le déclenche).
+#
+# Réglages du dépôt (Settings → Secrets and variables → Actions) :
+#   secrets   COOLIFY_WEBHOOK   URL « Deploy Webhook » de l'application (Coolify → Webhooks)
+#             COOLIFY_TOKEN     jeton d'API Coolify (Keys & Tokens → API tokens, droit « deploy »)
+# ---------------------------------------------------------------------------
+name: CI / CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: # bouton « Run workflow » dans l'onglet Actions
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (PHP 8.4 · MySQL 8.4)
+    runs-on: ubuntu-latest
+
+    # Base MySQL temporaire, même moteur qu'en production
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      # Doctrine ajoute le suffixe _test : la base de test s'appelle kairos_test
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/kairos?serverVersion=8.4.0&charset=utf8mb4
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: intl, pdo_mysql, zip
+          coverage: none
+
+      - name: Dépendances Composer (avec cache)
+        uses: ramsey/composer-install@v3
+
+      - name: Vérifications (conteneur, Twig, YAML)
+        run: |
+          php bin/console lint:container
+          php bin/console lint:twig templates
+          php bin/console lint:yaml config --parse-tags
+
+      - name: Base de test
+        run: |
+          php bin/console doctrine:database:create --env=test --if-not-exists
+          php bin/console doctrine:migrations:migrate --env=test --no-interaction
+          # Le schéma de la base correspond-il aux entités ?
+          php bin/console doctrine:schema:validate --env=test
+
+      - name: Tests
+        run: php bin/phpunit
+
+  image:
+    name: Image Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Construction de l'image de production
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Déploiement sur Coolify
+    needs: [tests, image]
+    # Uniquement main (push ou bouton manuel), jamais pour une pull request
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://kairos.projectp.fr
+    # Un seul déploiement à la fois ; un nouveau push attend la fin du précédent
+    concurrency:
+      group: production
+      cancel-in-progress: false
+
+    steps:
+      - name: Déclenchement du déploiement
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: curl --fail-with-body -sS -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK"
+
+      # Coolify construit l'image puis remplace le conteneur : on attend que le site réponde (10 minutes au plus)
+      - name: Vérification du site
+        run: |
+          sleep 60
+          for i in $(seq 1 54); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://kairos.projectp.fr/ || true)
+            echo "Page d'accueil : HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          exit 1

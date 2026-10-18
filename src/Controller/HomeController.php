@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Demo\DemoData;
+use App\Entity\Company;
 use App\Repository\CompanyRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,19 +14,21 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class HomeController extends AbstractController
 {
-    /** Les entreprises de démonstration (fixtures) : la vitrine n'affiche que celles qui existent */
-    private const array DEMO_SLUGS = ['salon-lumiere', 'cabinet-equilibre'];
-
     public function __construct(
         private readonly CompanyRepository $companies,
     ) {
     }
 
+    /** La vitrine n'affiche que les entreprises de démonstration qui existent, et leurs comptes publics */
     #[Route('/', name: 'app_home', methods: ['GET'])]
     public function index(): Response
     {
+        $demos = $this->companies->findBy(['isDemo' => true, 'isSuspended' => false], ['name' => 'DESC']);
+
         return $this->render('home/index.html.twig', [
-            'demos' => $this->companies->findBy(['slug' => self::DEMO_SLUGS, 'isSuspended' => false], ['name' => 'DESC']),
+            'demos' => $demos,
+            'demo_accounts' => array_any($demos, static fn (Company $company): bool => 'salon-lumiere' === $company->getSlug()) ? DemoData::ACCOUNTS : [],
+            'demo_password' => DemoData::DEMO_PASSWORD,
         ]);
     }
 

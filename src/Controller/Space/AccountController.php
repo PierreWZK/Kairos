@@ -71,6 +71,10 @@ final class AccountController extends AbstractSpaceController
         }
 
         if ($password->isSubmitted()) {
+            // Compte de démonstration public : le formulaire n'est pas affiché, et une requête forgée est refusée
+            if ($this->company()->isDemo()) {
+                throw $this->createAccessDeniedException('Le mot de passe d\'un compte de démonstration ne change pas.');
+            }
             if ($password->isValid()) {
                 $user->setPassword($passwordHasher->hashPassword($user, $password->get('plainPassword')->getData()));
                 $this->entityManager->flush();

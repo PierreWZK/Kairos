@@ -1,0 +1,17 @@
+# Rien de local ni de secret dans l'image
+.git
+.github
+.env.local
+.env.*.local
+.env.test
+.phpunit.cache
+var
+vendor
+assets/vendor
+public/assets
+public/uploads
+public/bundles
+tests
+phpunit.dist.xml
+*.md
+!README.md

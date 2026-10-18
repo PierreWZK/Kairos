@@ -8,8 +8,13 @@
         <h1 class="page-title">Équipe</h1>
         <p class="page-lede">Chaque membre gère les rendez-vous de ses calendriers et reçoit leurs notifications.</p>
     </div>
-    <a class="button button-primary" href="{{ path('app_space_team_invite') }}">Inviter quelqu'un</a>
+    {% if not company.demo %}
+        <a class="button button-primary" href="{{ path('app_space_team_invite') }}">Inviter quelqu'un</a>
+    {% endif %}
 </div>
+{% if company.demo %}
+    <p class="flash flash-warning">Démonstration : les invitations sont désactivées, aucun e-mail n'est envoyé. Vous pouvez modifier les calendriers de Marc ou le retirer : tout revient chaque nuit.</p>
+{% endif %}
 
 <ul class="row-list team-list">
     {% for member in members %}

@@ -50,6 +50,9 @@ final class TeamController extends AbstractSpaceController
     public function invite(Request $request): Response
     {
         $company = $this->company();
+        if ($company->isDemo()) {
+            return $this->refuseInDemo();
+        }
         $member = (new User())->setCompany($company)->setCompanyRole(CompanyRole::Member);
         $form = $this->createForm(MemberType::class, $member, ['invite' => true]);
         $form->handleRequest($request);
@@ -98,6 +101,9 @@ final class TeamController extends AbstractSpaceController
     {
         $this->checkToken('resend-invitation-'.$member->getId(), $request);
 
+        if ($this->company()->isDemo()) {
+            return $this->refuseInDemo();
+        }
         if (!$member->isInvitationPending()) {
             $this->addFlash('warning', sprintf('%s a déjà accepté l\'invitation.', $member->getName()));
         } elseif (!$this->limiter->create((string) $this->company()->getId())->consume()->isAccepted()) {
@@ -121,6 +127,14 @@ final class TeamController extends AbstractSpaceController
         $this->entityManager->remove($member);
         $this->entityManager->flush();
         $this->addFlash('success', sprintf('%s ne fait plus partie de l\'équipe.', $member->getName()));
+
+        return $this->redirectToRoute('app_space_team');
+    }
+
+    /** Démo publique : une invitation enverrait un e-mail à n'importe quelle adresse */
+    private function refuseInDemo(): Response
+    {
+        $this->addFlash('warning', 'Les invitations sont désactivées dans la démonstration : aucun e-mail n\'est envoyé.');
 
         return $this->redirectToRoute('app_space_team');
     }

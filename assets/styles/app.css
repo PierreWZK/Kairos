@@ -1259,6 +1259,23 @@ a.slot-free:focus-visible {
     list-style: none;
 }
 
+.demo-accounts {
+    margin-top: 1.5rem;
+}
+
+.demo-accounts h3 {
+    margin: 0 0 0.5rem;
+}
+
+.demo-accounts ul {
+    margin: 0.75rem 0 1rem;
+    padding-left: 1.25rem;
+}
+
+.demo-accounts code {
+    overflow-wrap: anywhere;
+}
+
 .demo-card .monogram {
     margin-bottom: 0.4rem;
 }

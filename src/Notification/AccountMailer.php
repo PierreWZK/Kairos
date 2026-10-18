@@ -49,6 +49,11 @@ final class AccountMailer
     /** @param array<string, mixed> $context */
     private function send(User $user, string $subject, string $template, string $url, array $context = []): void
     {
+        // Comptes de démonstration : adresses fictives, rien à envoyer
+        if (true === $user->getCompany()?->isDemo()) {
+            return;
+        }
+
         $email = (new TemplatedEmail())
             ->to(new Address($user->getEmail(), $user->getName()))
             ->subject($subject)

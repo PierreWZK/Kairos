@@ -165,7 +165,7 @@
             <p class="section-lede">Deux entreprises fictives, chacune à ses couleurs. Réservez un créneau pour voir le parcours de vos clients.</p>
 
             {% if demos is empty %}
-                <p class="empty">Les données de démonstration ne sont pas chargées (<code>php bin/console doctrine:fixtures:load</code>).</p>
+                <p class="empty">Les données de démonstration ne sont pas chargées (<code>php bin/console app:demo:reset</code>).</p>
             {% else %}
                 <ul class="demos">
                     {% for company in demos %}
@@ -182,6 +182,19 @@
                         </li>
                     {% endfor %}
                 </ul>
+            {% endif %}
+
+            {% if demo_accounts is not empty %}
+                <div class="space-card demo-accounts">
+                    <h3>Essayez aussi l'espace entreprise</h3>
+                    <p>Connectez-vous avec un compte de démonstration, mot de passe <code>{{ demo_password }}</code>. Tout est remis à zéro chaque nuit.</p>
+                    <ul>
+                        {% for email, role in demo_accounts %}
+                            <li><code>{{ email }}</code> · {{ role }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a class="button button-ghost button-small" href="{{ path('app_login') }}">Se connecter</a>
+                </div>
             {% endif %}
         </div>
     </section>

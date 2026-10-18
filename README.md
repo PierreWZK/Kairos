@@ -6,7 +6,9 @@ Kairos est une plateforme de **réservation de créneaux en ligne** pour les ent
 
 Le nom vient du grec ancien *kairos*, « le moment opportun », par opposition à *chronos*, le temps qui s'écoule.
 
-🔗 **Code :** [github.com/PierreWZK/Kairos](https://github.com/PierreWZK/Kairos)
+🌐 **En ligne :** [kairos.projectp.fr](https://kairos.projectp.fr) · 🔗 **Code :** [github.com/PierreWZK/Kairos](https://github.com/PierreWZK/Kairos)
+
+**Essayer sans s'inscrire** : réservez sur [Salon Lumière](https://kairos.projectp.fr/salon-lumiere), ou connectez-vous à son espace avec `julie@salon-lumiere.test` / `kairos-demo` (propriétaire) ou `marc@salon-lumiere.test` / `kairos-demo` (membre). La démo est remise à zéro chaque nuit.
 
 ## Trois espaces
 
@@ -100,7 +102,7 @@ echo 'DATABASE_URL="mysql://kairos:motdepasse@127.0.0.1:3306/kairos?serverVersio
 
 php bin/console doctrine:database:create --if-not-exists
 php bin/console doctrine:migrations:migrate
-php bin/console doctrine:fixtures:load    # deux entreprises de démo et leurs comptes
+php bin/console doctrine:fixtures:load    # vide la base : entreprises de démo + super-admin
 
 symfony serve -d                          # http://127.0.0.1:8000
 ```
@@ -111,13 +113,19 @@ Comptes de démo (mot de passe `kairos-demo`) :
 
 | Compte | Rôle |
 | --- | --- |
-| `admin@kairos.test` | Super-admin (`/admin`) |
+| `admin@kairos.test` | Super-admin (`/admin`), **en dev seulement** |
 | `julie@salon-lumiere.test` | Propriétaire de Salon Lumière (`/salon-lumiere`) |
 | `marc@salon-lumiere.test` | Membre de Salon Lumière, calendrier « Marc » seulement |
 | `contact@cabinet-equilibre.test` | Propriétaire de Cabinet Équilibre (`/cabinet-equilibre`) |
 
 - E-mails : en dev, rien ne part (`MAILER_DSN=null://null`) ; ils sont visibles dans le profiler (`/_profiler`, onglet **E-mails**).
-- Les fixtures calculent leurs dates à partir du jour : l'agenda de démo n'est jamais vide.
+- Les données de démo (`src/Demo/DemoData.php`) calculent leurs dates à partir du jour : l'agenda n'est jamais vide.
+
+### La démo publique
+
+Les entreprises de démo sont marquées comme telles en base (`Company::isDemo()`). Leurs comptes étant publics, ce qui pourrait gêner les visiteurs suivants y est désactivé : changer l'adresse e-mail, le mot de passe ou le lien de la page, et inviter quelqu'un (aucun e-mail n'est envoyé aux comptes de démo, dont les adresses sont fictives). Le reste s'essaie librement.
+
+`php bin/console app:demo:reset` les supprime et les recrée, avec des rendez-vous à partir du jour. Les autres entreprises ne sont jamais touchées : si une vraie entreprise a pris l'un des liens de la démo, la commande s'arrête sans rien modifier. En production, elle tourne chaque nuit.
 
 ## Tests
 
@@ -138,32 +146,88 @@ php bin/phpunit
 
 ## Mise en ligne
 
-Variables d'environnement à définir en production :
+Kairos tourne sur un VPS géré avec **[Coolify](https://coolify.io)** : **https://kairos.projectp.fr**.
 
-| Variable | Exemple |
-| --- | --- |
-| `APP_ENV` | `prod` |
-| `APP_SECRET` | une chaîne aléatoire (elle signe aussi les liens envoyés par e-mail) |
-| `DATABASE_URL` | `mysql://…` |
-| `MAILER_DSN` | `smtp://utilisateur:motdepasse@smtp.exemple.fr:587` |
-| `MAILER_FROM` | `Kairos <no-reply@exemple.fr>` |
-| `DEFAULT_URI` | `https://kairos.exemple.fr` (liens des e-mails envoyés hors requête) |
-
-```bash
-composer install --no-dev --optimize-autoloader
-php bin/console doctrine:migrations:migrate --no-interaction
-php bin/console asset-map:compile
-php bin/console app:create-admin vous@exemple.fr   # super-admin ; mot de passe demandé de façon masquée
+```
+git push (main) ──► GitHub Actions : tests + construction de l'image Docker
+                                         │ tout passe
+                                         ▼
+                    webhook Coolify ──► nouvelle image ──► migrations ──► site à jour
 ```
 
-- Le dossier `public/uploads/logos` doit être accessible en écriture par PHP, et conservé d'un déploiement à l'autre.
-- Le verrou anti-double réservation utilise des fichiers (`LOCK_DSN=flock`) : c'est suffisant sur un seul serveur. Avec plusieurs serveurs, il faudrait un verrou partagé (Redis, base de données).
+L'image (`Dockerfile`) repose sur **FrankenPHP** (Caddy + PHP 8.4) ; Coolify (Traefik) s'occupe du HTTPS. Au démarrage, `docker/entrypoint.sh` attend MySQL, lance les migrations et prépare le cache.
+
+### 1. La base de données
+
+Dans le projet Coolify : **+ New → Database → MySQL** (version 8.4). Notez l'URL de connexion interne (« MySQL URL (internal) »).
+
+### 2. L'application
+
+**+ New → Public/Private Repository** → `PierreWZK/Kairos`, branche `main`, **Build Pack : Dockerfile**, port **80**.
+
+- **Domaine** : `https://kairos.projectp.fr` (avec un enregistrement DNS `A` de `kairos` vers l'IP du VPS).
+- **Healthcheck** : chemin `/`, port 80.
+- **Déploiement automatique** : désactivé (c'est GitHub Actions qui le déclenche, après les tests).
+- **Stockage persistant** (*Persistent Storage*) : deux volumes.
+
+| Volume | Chemin dans le conteneur | Contenu |
+| --- | --- | --- |
+| `kairos-uploads` | `/app/public/uploads` | Logos des entreprises |
+| `kairos-share` | `/app/var/share` | Sessions, cache de l'appli, compteurs des limites |
+
+- **Variables d'environnement** (jamais versionnées) :
+
+| Variable | Valeur |
+| --- | --- |
+| `APP_SECRET` | une chaîne aléatoire de 32 caractères ou plus (`openssl rand -hex 32`) ; elle signe aussi les liens envoyés par e-mail |
+| `DATABASE_URL` | l'URL interne de l'étape 1, suivie de `?serverVersion=8.4.0&charset=utf8mb4` |
+| `MAILER_DSN` | le SMTP, par exemple `smtp://utilisateur:motdepasse@smtp.exemple.fr:587` |
+| `MAILER_FROM` | `Kairos <no-reply@kairos.projectp.fr>` (une adresse autorisée par ce SMTP) |
+| `DEFAULT_URI` | `https://kairos.projectp.fr` (liens des e-mails envoyés hors requête) |
+
+`APP_ENV=prod` et `TRUSTED_PROXIES=private_ranges` sont déjà fixés par l'image.
+
+### 3. Premier démarrage
+
+Une fois le premier déploiement terminé, dans **Terminal** (conteneur de l'application) :
+
+```bash
+php bin/console app:create-admin vous@exemple.fr   # super-admin ; mot de passe demandé de façon masquée
+php bin/console app:demo:reset                     # les entreprises de démo
+```
+
+Puis, dans **Scheduled Tasks**, une tâche quotidienne qui remet la démo à zéro :
+
+| Nom | Commande | Fréquence |
+| --- | --- | --- |
+| `demo-reset` | `php bin/console app:demo:reset` | `0 4 * * *` (chaque nuit à 4 h) |
+
+### 4. Déploiement continu
+
+Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) :
+
+1. **Tests**, à chaque push et pull request : PHP 8.4 et MySQL 8.4, vérification du conteneur, des templates et du schéma de la base, puis PHPUnit.
+2. **Image Docker** : l'image de production est construite, pour qu'une erreur du `Dockerfile` se voie avant le déploiement.
+3. **Déploiement** (uniquement sur `main`, et seulement si tout passe) : le webhook de Coolify reconstruit et remplace le conteneur ; le workflow attend ensuite que la page d'accueil réponde.
+
+| Secret du dépôt (*Settings → Secrets and variables → Actions*) | Valeur |
+| --- | --- |
+| `COOLIFY_WEBHOOK` | URL **Deploy Webhook** de l'application (onglet *Webhooks*) |
+| `COOLIFY_TOKEN` | jeton d'API Coolify (*Keys & Tokens → API tokens*, droit *deploy*) |
+
+Le bouton **Actions → CI / CD → Run workflow** permet aussi de redéployer à la main.
+
+### Bon à savoir
+
+- Le verrou anti-double réservation utilise des fichiers (`LOCK_DSN=flock`) : c'est suffisant pour un seul conteneur. Avec plusieurs, il faudrait un verrou partagé (Redis, base de données).
+- Les e-mails partent pendant la requête (pas de file d'attente) : un SMTP lent ralentit la réservation, mais un échec d'envoi n'empêche jamais de réserver (il est journalisé).
 
 ## Structure
 
 ```
 src/
-├── Command/CreateAdminCommand.php     app:create-admin
+├── Command/                           app:create-admin, app:demo:reset
+├── Demo/DemoData.php                  Les entreprises de démo (fixtures en dev, app:demo:reset en production)
 ├── Controller/
 │   ├── HomeController.php             Vitrine, démo d'intégration
 │   ├── BookingController.php          Parcours client (page Kairos et version intégrée)
@@ -183,11 +247,13 @@ src/
 ├── Security/                          Liens signés, contrôle de connexion, SpaceVoter
 ├── Twig/                              Filtres de format, liens publics, heure locale
 ├── Upload/                            Logos : contrôle, nettoyage des SVG
-└── DataFixtures/AppFixtures.php       Données de démo
+└── DataFixtures/AppFixtures.php       Données de dev : la démo + un super-admin
 templates/
 ├── home/, booking/, integration/, security/, space/, admin/, emails/
 └── _header, _footer, _flashes
 public/embed.js                        Script d'intégration sur un site externe
+Dockerfile, docker/                    Image de production (FrankenPHP), démarrage, réglages PHP
+.github/workflows/main.yml             Tests, image Docker, déploiement Coolify
 tests/
 ├── Unit/, Integration/, Functional/
 └── AgendaTestTrait.php                Données de test et heure figée

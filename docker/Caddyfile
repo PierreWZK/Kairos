@@ -1,0 +1,17 @@
+# Serveur web de l'image (FrankenPHP). Le HTTPS est géré par le proxy de Coolify : ici, du HTTP sur le port 80.
+{
+	frankenphp
+	auto_https off
+}
+
+:80 {
+	root * /app/public
+	encode zstd br gzip
+
+	# Fichiers compilés par AssetMapper : leur nom change à chaque version, ils se gardent un an
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# Fichiers existants servis tels quels, tout le reste passe par public/index.php
+	php_server
+}

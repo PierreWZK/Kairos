@@ -22,12 +22,18 @@ final class CompanyType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Démo : la vitrine et le site d'exemple pointent vers ce lien
+        $demo = true === $builder->getData()?->isDemo();
+
         $builder
             ->add('name', TextType::class, ['label' => 'Nom de l\'entreprise', 'empty_data' => ''])
             ->add('slug', TextType::class, [
                 'label' => 'Lien de votre page',
                 'empty_data' => '',
-                'help' => 'Attention : le changer rend l\'ancien lien inutilisable, y compris dans le code intégré à votre site.',
+                'disabled' => $demo,
+                'help' => $demo
+                    ? 'Le lien d\'une entreprise de démonstration ne change pas.'
+                    : 'Attention : le changer rend l\'ancien lien inutilisable, y compris dans le code intégré à votre site.',
                 'attr' => ['spellcheck' => 'false'],
             ])
             ->add('description', TextareaType::class, [
