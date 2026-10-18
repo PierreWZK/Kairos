@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Kairos · Réservez le bon moment{% endblock %}
+
+{# Aperçu statique de l'agenda : 'free' libre, 'taken' déjà réservé, 'picked' choisi par le visiteur #}
+{% set week = [
+    { day: 'Lun', date: '20', slots: [['09:00', 'taken'], ['10:00', 'free'], ['11:00', 'free'], ['14:00', 'taken'], ['15:00', 'free']] },
+    { day: 'Mar', date: '21', slots: [['09:00', 'free'], ['10:00', 'taken'], ['11:00', 'taken'], ['14:00', 'free'], ['15:00', 'free']] },
+    { day: 'Mer', date: '22', slots: [['09:00', 'free'], ['10:00', 'free'], ['11:00', 'picked'], ['14:00', 'taken'], ['15:00', 'taken']] },
+    { day: 'Jeu', date: '23', slots: [['09:00', 'taken'], ['10:00', 'taken'], ['11:00', 'free'], ['14:00', 'free'], ['15:00', 'free']] },
+    { day: 'Ven', date: '24', slots: [['09:00', 'free'], ['10:00', 'free'], ['11:00', 'taken'], ['14:00', 'free'], ['15:00', 'taken']] },
+] %}
+
+{% block body %}
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="{{ path('app_home') }}">
+            <span class="brand-mark" aria-hidden="true"></span>
+            Kairos
+        </a>
+        <nav class="nav" aria-label="Navigation principale">
+            <a href="#fonctionnement">Fonctionnement</a>
+            <a href="#fonctionnalites">Fonctionnalités</a>
+            <a href="#regles">Règles</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-inner">
+            <div class="hero-text">
+                <p class="eyebrow">Réservation de créneaux en ligne</p>
+                <h1>Le bon moment,<br><em>réservé en deux clics.</em></h1>
+                <p class="lede">
+                    Kairos met en ligne l'agenda d'un professionnel. Le client choisit un créneau libre et réserve
+                    sans créer de compte. Le professionnel gère ses prestations, ses horaires et ses rendez-vous
+                    depuis un back-office.
+                </p>
+                <div class="hero-actions">
+                    <span class="button button-disabled" aria-disabled="true">Réservations bientôt ouvertes</span>
+                    <a class="button button-ghost" href="#fonctionnement">Voir comment ça marche</a>
+                </div>
+            </div>
+
+            <figure class="agenda" aria-label="Aperçu d'une semaine de créneaux">
+                <div class="agenda-head">
+                    <div>
+                        <p class="agenda-label">Semaine du 20 octobre</p>
+                        <p class="agenda-service">Séance individuelle · 1 h</p>
+                    </div>
+                    <div class="agenda-arrows" aria-hidden="true"><span>‹</span><span>›</span></div>
+                </div>
+                <div class="agenda-grid">
+                    {% for d in week %}
+                        <div class="agenda-day">
+                            <p class="agenda-dayname">{{ d.day }} <strong>{{ d.date }}</strong></p>
+                            {% for slot in d.slots %}
+                                <span class="slot slot-{{ slot[1] }}">{{ slot[0] }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <figcaption class="agenda-foot">
+                    <span class="legend"><span class="dot dot-free"></span>Libre</span>
+                    <span class="legend"><span class="dot dot-taken"></span>Réservé</span>
+                    <span class="legend"><span class="dot dot-picked"></span>Votre choix · mer. 22, 11:00</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section id="fonctionnement" class="section">
+        <div class="container">
+            <p class="eyebrow">Fonctionnement</p>
+            <h2>Trois étapes, aucun compte à créer</h2>
+            <ol class="steps">
+                <li class="step">
+                    <span class="step-num">1</span>
+                    <h3>Choisir une prestation</h3>
+                    <p>Chaque prestation a sa durée et son prix. L'agenda n'affiche que les créneaux où elle tient en entier.</p>
+                </li>
+                <li class="step">
+                    <span class="step-num">2</span>
+                    <h3>Prendre un créneau libre</h3>
+                    <p>On parcourt les semaines, on clique sur un horaire disponible, puis on laisse son nom et son e-mail.</p>
+                </li>
+                <li class="step">
+                    <span class="step-num">3</span>
+                    <h3>Recevoir la confirmation</h3>
+                    <p>Un récapitulatif est envoyé avec un lien personnel pour annuler le rendez-vous en cas d'empêchement.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <section id="fonctionnalites" class="section section-alt">
+        <div class="container">
+            <p class="eyebrow">Fonctionnalités</p>
+            <h2>Un même agenda, deux points de vue</h2>
+            <div class="sides">
+                <article class="side">
+                    <h3><span class="side-tag">Client</span> Réserver</h3>
+                    <ul>
+                        <li>Agenda à la semaine, créneaux libres en un coup d'œil</li>
+                        <li>Choix de la prestation (durée, prix)</li>
+                        <li>Réservation sans inscription : nom et e-mail suffisent</li>
+                        <li>Lien d'annulation personnel, sans mot de passe</li>
+                    </ul>
+                </article>
+                <article class="side side-pro">
+                    <h3><span class="side-tag">Professionnel</span> Gérer</h3>
+                    <ul>
+                        <li>Back-office EasyAdmin protégé par connexion</li>
+                        <li>Prestations : nom, durée, prix, activation</li>
+                        <li>Horaires d'ouverture par jour et périodes fermées</li>
+                        <li>Liste des réservations, filtres et annulation</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="regles" class="section">
+        <div class="container">
+            <p class="eyebrow">Règles</p>
+            <h2>Un agenda qui ne se contredit jamais</h2>
+            <div class="rules">
+                <div class="rule">
+                    <h3>Pas de double réservation</h3>
+                    <p>Deux personnes qui visent le même créneau au même instant : une seule l'obtient, l'autre est prévenue.</p>
+                </div>
+                <div class="rule">
+                    <h3>Pas de rendez-vous dans le passé</h3>
+                    <p>Les créneaux déjà passés, ou trop proches de l'heure actuelle, ne sont plus proposés.</p>
+                </div>
+                <div class="rule">
+                    <h3>Les horaires font foi</h3>
+                    <p>Hors des horaires d'ouverture ou pendant une fermeture, aucun créneau n'est réservable.</p>
+                </div>
+                <div class="rule">
+                    <h3>Une annulation libère la place</h3>
+                    <p>Dès qu'un rendez-vous est annulé, son créneau redevient visible pour les autres clients.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <span>Kairos · Jour 05 du défi 30 jours, 30 projets</span>
+        <span>Fait avec Symfony · <a href="https://github.com/PierreWZK/Kairos" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
+    </div>
+</footer>
+{% endblock %}
