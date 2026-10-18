@@ -1,0 +1,11 @@
+{#
+ # Le code à coller sur le site d'une entreprise pour y afficher son calendrier.
+ # Variables : embed_url (la page /integration/… à afficher), page_url (la page Kairos, lien de secours sans JavaScript)
+ #}
+{% set code %}
+<div data-kairos="{{ embed_url }}">
+  <a href="{{ page_url }}">Prendre rendez-vous en ligne</a>
+</div>
+<script src="{{ absolute_url(asset('embed.js')) }}" async></script>
+{% endset %}
+<pre class="code"><code>{{ code|trim|e }}</code></pre>

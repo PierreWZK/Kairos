@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Kairos · Réservez le bon moment{% endblock %}
+{% block title %}Kairos · La prise de rendez-vous en ligne pour votre entreprise{% endblock %}
+{% block description %}Kairos donne à votre entreprise une page de réservation à vos couleurs, à partager en lien ou à intégrer sur votre site. Vos clients réservent seuls, sans créer de compte.{% endblock %}
 
 {# Aperçu statique de l'agenda : 'free' libre, 'taken' déjà réservé, 'picked' choisi par le visiteur #}
 {% set week = [
@@ -11,6 +12,15 @@
     { day: 'Ven', date: '24', slots: [['09:00', 'free'], ['10:00', 'free'], ['11:00', 'taken'], ['14:00', 'free'], ['15:00', 'taken']] },
 ] %}
 
+{% set features = [
+    { icon: '◫', title: 'Plusieurs calendriers', text: 'Un agenda par collaborateur, par salle ou par lieu, chacun avec ses horaires, ses fermetures et ses prestations.' },
+    { icon: '⚙', title: 'Vos règles', text: 'Pas des créneaux, délai minimal avant un rendez-vous, horizon de réservation, délai d\'annulation : tout se règle par calendrier.' },
+    { icon: '✓', title: 'Validation manuelle', text: 'Recevez des demandes plutôt que des réservations fermes, et acceptez-les ou refusez-les. Le client est prévenu par e-mail.' },
+    { icon: '✎', title: 'Un formulaire sur mesure', text: 'Téléphone obligatoire ou non, note du client, message d\'accueil : demandez seulement ce dont vous avez besoin.' },
+    { icon: '◐', title: 'Une page à vos couleurs', text: 'Votre nom, votre logo, votre couleur et une adresse lisible : /votre-entreprise/votre-calendrier.' },
+    { icon: '☺', title: 'Votre équipe', text: 'Invitez vos collaborateurs : chacun gère les rendez-vous de ses propres calendriers.' },
+] %}
+
 {% block body %}
 {{ include('_header.html.twig') }}
 
@@ -18,16 +28,16 @@
     <section class="hero">
         <div class="container hero-inner">
             <div class="hero-text">
-                <p class="eyebrow">Réservation de créneaux en ligne</p>
-                <h1>Le bon moment,<br><em>réservé en deux clics.</em></h1>
+                <p class="eyebrow">Prise de rendez-vous en ligne pour les entreprises</p>
+                <h1>Votre agenda en ligne,<br><em>vos clients réservent seuls.</em></h1>
                 <p class="lede">
-                    Kairos met en ligne l'agenda d'un professionnel. Le client choisit un créneau libre et réserve
-                    sans créer de compte. Le professionnel gère ses prestations, ses horaires et ses rendez-vous
-                    depuis un back-office.
+                    Kairos donne à votre entreprise une page de réservation à vos couleurs. Partagez son lien
+                    ou intégrez-la sur votre site : vos clients choisissent un créneau libre sans créer de compte,
+                    et vous gérez calendriers, prestations et rendez-vous depuis votre espace.
                 </p>
                 <div class="hero-actions">
-                    <a class="button button-primary" href="{{ path('app_company', {company: 'salon-lumiere'}) }}">Voir une page de démo</a>
-                    <a class="button button-ghost" href="#fonctionnement">Voir comment ça marche</a>
+                    <a class="button button-primary" href="#demos">Voir les démos</a>
+                    <a class="button button-ghost" href="#fonctionnement">Comment ça marche</a>
                 </div>
             </div>
 
@@ -35,7 +45,7 @@
                 <div class="agenda-head">
                     <div>
                         <p class="agenda-label">Semaine du 20 octobre</p>
-                        <p class="agenda-service">Séance individuelle · 1 h</p>
+                        <p class="agenda-service">/salon-lumiere/julie · Coupe femme · 45 min</p>
                     </div>
                     <div class="agenda-arrows" aria-hidden="true"><span>‹</span><span>›</span></div>
                 </div>
@@ -61,22 +71,22 @@
     <section id="fonctionnement" class="section">
         <div class="container">
             <p class="eyebrow">Fonctionnement</p>
-            <h2>Trois étapes, aucun compte à créer</h2>
+            <h2>En ligne en trois étapes</h2>
             <ol class="steps">
                 <li class="step">
                     <span class="step-num">1</span>
-                    <h3>Choisir une prestation</h3>
-                    <p>Chaque prestation a sa durée et son prix. L'agenda n'affiche que les créneaux où elle tient en entier.</p>
+                    <h3>Créez votre espace</h3>
+                    <p>Le nom de votre entreprise, son adresse sur Kairos et son fuseau horaire. Un e-mail confirme votre inscription.</p>
                 </li>
                 <li class="step">
                     <span class="step-num">2</span>
-                    <h3>Prendre un créneau libre</h3>
-                    <p>On parcourt les semaines, on clique sur un horaire disponible, puis on laisse son nom et son e-mail.</p>
+                    <h3>Configurez vos calendriers</h3>
+                    <p>Vos prestations (durée, prix), puis pour chaque calendrier : horaires d'ouverture, fermetures et règles de réservation.</p>
                 </li>
                 <li class="step">
                     <span class="step-num">3</span>
-                    <h3>Recevoir la confirmation</h3>
-                    <p>Un récapitulatif est envoyé avec un lien personnel pour annuler le rendez-vous en cas d'empêchement.</p>
+                    <h3>Partagez ou intégrez</h3>
+                    <p>Envoyez le lien de votre page à vos clients, ou collez trois lignes de code pour afficher le calendrier sur votre site.</p>
                 </li>
             </ol>
         </div>
@@ -85,52 +95,94 @@
     <section id="fonctionnalites" class="section section-alt">
         <div class="container">
             <p class="eyebrow">Fonctionnalités</p>
-            <h2>Un même agenda, deux points de vue</h2>
-            <div class="sides">
+            <h2>Un outil qui s'adapte à votre façon de travailler</h2>
+            <div class="features">
+                {% for feature in features %}
+                    <article class="feature">
+                        <span class="feature-icon" aria-hidden="true">{{ feature.icon }}</span>
+                        <h3>{{ feature.title }}</h3>
+                        <p>{{ feature.text }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <div class="sides sides-spaced">
                 <article class="side">
-                    <h3><span class="side-tag">Client</span> Réserver</h3>
+                    <h3><span class="side-tag">Vos clients</span> Réservent</h3>
                     <ul>
                         <li>Agenda à la semaine, créneaux libres en un coup d'œil</li>
-                        <li>Choix de la prestation (durée, prix)</li>
                         <li>Réservation sans inscription : nom et e-mail suffisent</li>
-                        <li>Lien d'annulation personnel, sans mot de passe</li>
+                        <li>Confirmation par e-mail, avec invitation pour leur agenda</li>
+                        <li>Lien personnel pour annuler en cas d'empêchement</li>
                     </ul>
                 </article>
                 <article class="side side-pro">
-                    <h3><span class="side-tag">Professionnel</span> Gérer</h3>
+                    <h3><span class="side-tag">Vous</span> Gardez la main</h3>
                     <ul>
-                        <li>Back-office EasyAdmin protégé par connexion</li>
-                        <li>Prestations : nom, durée, prix, activation</li>
-                        <li>Horaires d'ouverture par jour et périodes fermées</li>
-                        <li>Liste des réservations, filtres et annulation</li>
+                        <li>Pas de double réservation, même au même instant</li>
+                        <li>Aucun créneau hors horaires, pendant une fermeture ou dans le passé</li>
+                        <li>Une annulation libère aussitôt la place</li>
+                        <li>Chaque nouvelle réservation vous est signalée par e-mail</li>
                     </ul>
                 </article>
             </div>
         </div>
     </section>
 
-    <section id="regles" class="section">
-        <div class="container">
-            <p class="eyebrow">Règles</p>
-            <h2>Un agenda qui ne se contredit jamais</h2>
-            <div class="rules">
-                <div class="rule">
-                    <h3>Pas de double réservation</h3>
-                    <p>Deux personnes qui visent le même créneau au même instant : une seule l'obtient, l'autre est prévenue.</p>
-                </div>
-                <div class="rule">
-                    <h3>Pas de rendez-vous dans le passé</h3>
-                    <p>Les créneaux déjà passés, ou trop proches de l'heure actuelle, ne sont plus proposés.</p>
-                </div>
-                <div class="rule">
-                    <h3>Les horaires font foi</h3>
-                    <p>Hors des horaires d'ouverture ou pendant une fermeture, aucun créneau n'est réservable.</p>
-                </div>
-                <div class="rule">
-                    <h3>Une annulation libère la place</h3>
-                    <p>Dès qu'un rendez-vous est annulé, son créneau redevient visible pour les autres clients.</p>
+    <section id="integration" class="section">
+        <div class="container integration">
+            <div>
+                <p class="eyebrow">Intégration</p>
+                <h2>Votre calendrier, directement sur votre site</h2>
+                <p class="section-lede">
+                    Pas besoin d'envoyer vos clients ailleurs : copiez le code fourni dans votre espace et collez-le
+                    dans une page de votre site, quel que soit l'outil (WordPress, Wix, Squarespace, un site sur mesure…).
+                </p>
+                <ul class="integration-points">
+                    <li>Toute l'entreprise, ou un seul calendrier</li>
+                    <li>S'ajuste à la largeur et à la hauteur de la page</li>
+                    <li>Aux couleurs de votre entreprise, en thème clair</li>
+                    <li>Un lien de secours si JavaScript est désactivé</li>
+                </ul>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="{{ path('app_demo_integration') }}">Voir un site d'exemple</a>
                 </div>
             </div>
+            <div>
+                <p class="code-label">Exemple : le calendrier du Salon Lumière</p>
+                {{ include('integration/_snippet.html.twig', {
+                    embed_url: url('app_company_embed', {company: 'salon-lumiere'}),
+                    page_url: url('app_company', {company: 'salon-lumiere'}),
+                }) }}
+            </div>
+        </div>
+    </section>
+
+    <section id="demos" class="section section-alt">
+        <div class="container">
+            <p class="eyebrow">Démos</p>
+            <h2>Essayez une page de réservation</h2>
+            <p class="section-lede">Deux entreprises fictives, chacune à ses couleurs. Réservez un créneau pour voir le parcours de vos clients.</p>
+
+            {% if demos is empty %}
+                <p class="empty">Les données de démonstration ne sont pas chargées (<code>php bin/console doctrine:fixtures:load</code>).</p>
+            {% else %}
+                <ul class="demos">
+                    {% for company in demos %}
+                        <li class="branded" style="--brand: {{ company.accentColor }}">
+                            <a class="service-card demo-card" href="{{ path('app_company', {company: company.slug}) }}">
+                                {{ include('booking/_logo.html.twig') }}
+                                <span class="service-name">{{ company.name }}</span>
+                                {% if company.description %}
+                                    <span class="service-description">{{ company.description }}</span>
+                                {% endif %}
+                                <span class="service-duration">/{{ company.slug }} · {{ company.activeCalendars|length }} calendrier{{ company.activeCalendars|length > 1 ? 's' }}</span>
+                                <span class="service-cta">Ouvrir la page →</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     </section>
 </main>

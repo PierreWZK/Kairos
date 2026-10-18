@@ -19,8 +19,9 @@
     --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+/* Thème sombre, sauf dans le calendrier intégré (data-theme="light") : il doit s'accorder au site qui l'accueille */
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme='light']) {
         --bg: #121a1a;
         --bg-alt: #172222;
         --surface: #1b2727;
@@ -977,6 +978,377 @@ a.slot-free:focus-visible {
     text-decoration: underline;
 }
 
+/* Pages d'une entreprise : sa couleur remplace celle de Kairos (--brand, assez foncée pour du texte blanc) */
+
+.branded {
+    --primary: var(--brand);
+    --slot-free: color-mix(in oklab, var(--brand) 12%, var(--surface));
+    --slot-free-ink: var(--brand);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .branded {
+        --primary: color-mix(in oklab, var(--brand) 55%, white);
+        --slot-free: color-mix(in oklab, var(--brand) 35%, var(--surface));
+        --slot-free-ink: color-mix(in oklab, var(--brand) 30%, white);
+    }
+}
+
+.company-header {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.company-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 64px;
+}
+
+.company-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.company-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    object-fit: contain;
+}
+
+.monogram {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    border-radius: 9px;
+    color: var(--primary-ink);
+    font-family: var(--serif);
+    font-weight: 600;
+}
+
+.monogram-large {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    font-size: 2rem;
+}
+
+.company-header-note {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.company-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.company-hero .company-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+}
+
+.company-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.calendar-card {
+    gap: 0.6rem;
+}
+
+.calendar-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.calendar-card .monogram {
+    background: color-mix(in oklab, var(--primary) 14%, var(--surface));
+    color: var(--primary);
+}
+
+.calendar-services {
+    margin: 0;
+    padding: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    list-style: none;
+}
+
+.calendar-services li + li::before {
+    content: ' · ';
+}
+
+.calendar-services li {
+    display: inline;
+}
+
+.powered {
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.powered a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Calendrier intégré dans le site d'une entreprise : pas d'en-tête ni de pied de page, des marges réduites */
+
+.is-embed body {
+    background: var(--bg);
+}
+
+.page-embed {
+    padding: 1.5rem 0 1rem;
+}
+
+.page-embed .container {
+    width: calc(100% - 32px);
+}
+
+.page-embed .page-title {
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+}
+
+.page-embed .planner {
+    margin-top: 1.5rem;
+}
+
+.embed-credit {
+    padding: 0 16px 1rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.embed-credit a {
+    color: inherit;
+}
+
+/* Vitrine : fonctionnalités, intégration, démos */
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+}
+
+.feature {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.feature h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+}
+
+.feature p {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.feature-icon {
+    display: block;
+    margin-bottom: 0.9rem;
+    color: var(--primary);
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.sides-spaced {
+    margin-top: 1.5rem;
+}
+
+.section-lede {
+    max-width: 40rem;
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+.integration {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.integration .hero-actions {
+    margin-top: 1.5rem;
+}
+
+.integration-points {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.integration-points li {
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--muted);
+}
+
+.integration-points li + li {
+    margin-top: 0.4rem;
+}
+
+.integration-points li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.code {
+    margin: 0;
+    padding: 1.25rem 1.4rem;
+    overflow-x: auto;
+    background: #13201f;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    color: #d9e7e3;
+    font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    white-space: pre;
+}
+
+.code-label {
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.demos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.demo-card .monogram {
+    margin-bottom: 0.4rem;
+}
+
+/* Exemple de site externe qui intègre Kairos (page de démo) */
+
+.demo-banner {
+    padding: 0.7rem 0;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.9rem;
+}
+
+.demo-banner .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+}
+
+.demo-banner a {
+    color: inherit;
+    font-weight: 600;
+}
+
+.external-site {
+    --site-accent: #b4513a;
+
+    background: #fff;
+    color: #2b2420;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.external-hero {
+    padding: 3.5rem 0 2.5rem;
+    background: #f7ebe4;
+    text-align: center;
+}
+
+.external-nav {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.external-hero h1 {
+    font-family: Georgia, serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 400;
+}
+
+.external-hero p {
+    margin-top: 0.75rem;
+    color: #6d5b52;
+}
+
+.external-section {
+    padding: 3rem 0;
+}
+
+.external-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--site-accent);
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    text-align: center;
+}
+
+.external-widget {
+    max-width: 960px;
+    margin-inline: auto;
+}
+
+.external-footer {
+    padding: 2rem 0;
+    background: #2b2420;
+    color: #d8c9c0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.demo-code {
+    padding: 3rem 0 4rem;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -987,8 +1359,13 @@ a.slot-free:focus-visible {
 
     .steps,
     .sides,
-    .rules {
+    .rules,
+    .integration {
         grid-template-columns: 1fr;
+    }
+
+    .features {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .checkout {
@@ -1035,8 +1412,18 @@ a.slot-free:focus-visible {
 }
 
 @media (max-width: 600px) {
-    .nav {
+    .nav,
+    .company-header-note {
         display: none;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .company-hero {
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .hero {

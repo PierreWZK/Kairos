@@ -121,7 +121,8 @@ class AppFixtures extends Fixture
             ->setName('Cabinet Équilibre')
             ->setSlug('cabinet-equilibre')
             ->setDescription('Coaching professionnel et bilans de compétences, en cabinet ou en visio.')
-            ->setAddress('8 place des Vosges, 75004 Paris');
+            ->setAddress('8 place des Vosges, 75004 Paris')
+            ->setAccentColor('#3d4f8a');
         $manager->persist($cabinet);
 
         $services = $this->services($manager, $cabinet, [

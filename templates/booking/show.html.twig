@@ -1,75 +1,69 @@
-{% extends 'base.html.twig' %}
+{% extends 'booking/_layout.html.twig' %}
 
 {% block title %}Votre rendez-vous · {{ company.name }}{% endblock %}
 
-{# Page privée : son adresse contient le jeton d'annulation, elle ne doit ni être indexée ni fuiter par le Referer #}
+{#
+ # Page privée : son adresse contient le jeton d'annulation, elle ne doit ni être indexée ni fuiter par le Referer.
+ # « same-origin » plutôt que « no-referrer » : le navigateur garde l'en-tête Origin du formulaire d'annulation,
+ # dont dépend la protection CSRF sans session.
+ #}
 {% block meta %}
     <meta name="robots" content="noindex">
-    <meta name="referrer" content="no-referrer">
+    <meta name="referrer" content="same-origin">
 {% endblock %}
 
-{% block body %}
-{{ include('_header.html.twig') }}
+{% block content %}
+{% set status = booking.status.value %}
+{% if status == 'cancelled' %}
+    <p class="eyebrow">Rendez-vous annulé</p>
+    <h1 class="page-title">Ce rendez-vous a été annulé</h1>
+    <p class="page-lede">Annulé le {{ booking.cancelledAt|format_date(pattern: 'd MMMM y') }}. Le créneau est de nouveau proposé aux autres clients, et une confirmation a été envoyée à {{ booking.customerEmail }}.</p>
+{% elseif status == 'rejected' %}
+    <p class="eyebrow">Demande refusée</p>
+    <h1 class="page-title">{{ company.name }} n'a pas pu accepter cette demande</h1>
+    <p class="page-lede">Vous pouvez choisir un autre créneau.</p>
+{% elseif status == 'pending' %}
+    <p class="eyebrow">Demande envoyée</p>
+    <h1 class="page-title">Merci, {{ booking.customerName }} !</h1>
+    <p class="page-lede">Votre demande est en attente de validation par {{ company.name }}. Vous recevrez un e-mail à {{ booking.customerEmail }} dès qu'elle sera acceptée ou refusée.</p>
+{% else %}
+    <p class="eyebrow">C'est réservé</p>
+    <h1 class="page-title">À bientôt, {{ booking.customerName }} !</h1>
+    <p class="page-lede">Votre rendez-vous avec {{ company.name }} est confirmé. Un récapitulatif a été envoyé à {{ booking.customerEmail }}, avec un lien vers cette page.</p>
+{% endif %}
 
-<main class="page">
-    <div class="container">
-        {{ include('_flashes.html.twig') }}
+<div class="checkout">
+    {{ include('booking/_summary.html.twig') }}
 
-        {% set status = booking.status.value %}
-        {% if status == 'cancelled' %}
-            <p class="eyebrow">Rendez-vous annulé</p>
-            <h1 class="page-title">Ce rendez-vous a été annulé</h1>
-            <p class="page-lede">Annulé le {{ booking.cancelledAt|format_date(pattern: 'd MMMM y') }}. Le créneau est de nouveau proposé aux autres clients.</p>
-        {% elseif status == 'rejected' %}
-            <p class="eyebrow">Demande refusée</p>
-            <h1 class="page-title">{{ company.name }} n'a pas pu accepter cette demande</h1>
-            <p class="page-lede">Vous pouvez choisir un autre créneau.</p>
-        {% elseif status == 'pending' %}
-            <p class="eyebrow">Demande envoyée</p>
-            <h1 class="page-title">Merci, {{ booking.customerName }} !</h1>
-            <p class="page-lede">Votre demande est en attente de validation par {{ company.name }}. Vous recevrez un e-mail à {{ booking.customerEmail }} dès qu'elle sera acceptée ou refusée.</p>
-        {% else %}
-            <p class="eyebrow">C'est réservé</p>
-            <h1 class="page-title">À bientôt, {{ booking.customerName }} !</h1>
-            <p class="page-lede">Votre rendez-vous avec {{ company.name }} est confirmé. Un récapitulatif a été envoyé à {{ booking.customerEmail }}, avec un lien vers cette page.</p>
+    <div class="details">
+        <h2 class="details-title">Vos coordonnées</h2>
+        <dl class="details-list">
+            <div><dt>Nom</dt><dd>{{ booking.customerName }}</dd></div>
+            <div><dt>E-mail</dt><dd>{{ booking.customerEmail }}</dd></div>
+            {% if booking.customerPhone %}
+                <div><dt>Téléphone</dt><dd>{{ booking.customerPhone }}</dd></div>
+            {% endif %}
+            {% if booking.note %}
+                <div><dt>Note</dt><dd>{{ booking.note|nl2br }}</dd></div>
+            {% endif %}
+        </dl>
+
+        {% if can_cancel %}
+            <details class="cancel-box">
+                <summary>{{ status == 'pending' ? 'Retirer ma demande' : 'Annuler ce rendez-vous' }}</summary>
+                <p>Le créneau sera libéré pour d'autres clients. Cette action est définitive.</p>
+                <form method="post" action="{{ public_path('app_booking_cancel', {token: booking.cancelToken}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cancel-booking') }}">
+                    <button type="submit" class="button button-danger">Oui, annuler le rendez-vous</button>
+                </form>
+            </details>
+        {% elseif booking.status.blocksSlot and not is_past %}
+            <p class="details-note">Le rendez-vous commence dans moins de {{ calendar.cancelNoticeHours }} h : il ne peut plus être annulé en ligne.</p>
+        {% elseif booking.status.blocksSlot and is_past %}
+            <p class="details-note">Ce rendez-vous est passé.</p>
         {% endif %}
 
-        <div class="checkout">
-            {{ include('booking/_summary.html.twig') }}
-
-            <div class="details">
-                <h2 class="details-title">Vos coordonnées</h2>
-                <dl class="details-list">
-                    <div><dt>Nom</dt><dd>{{ booking.customerName }}</dd></div>
-                    <div><dt>E-mail</dt><dd>{{ booking.customerEmail }}</dd></div>
-                    {% if booking.customerPhone %}
-                        <div><dt>Téléphone</dt><dd>{{ booking.customerPhone }}</dd></div>
-                    {% endif %}
-                    {% if booking.note %}
-                        <div><dt>Note</dt><dd>{{ booking.note|nl2br }}</dd></div>
-                    {% endif %}
-                </dl>
-
-                {% if can_cancel %}
-                    <details class="cancel-box">
-                        <summary>{{ status == 'pending' ? 'Retirer ma demande' : 'Annuler ce rendez-vous' }}</summary>
-                        <p>Le créneau sera libéré pour d'autres clients. Cette action est définitive.</p>
-                        <form method="post" action="{{ path('app_booking_cancel', {token: booking.cancelToken}) }}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('cancel-booking') }}">
-                            <button type="submit" class="button button-danger">Oui, annuler le rendez-vous</button>
-                        </form>
-                    </details>
-                {% elseif booking.status.blocksSlot and not is_past %}
-                    <p class="details-note">Le rendez-vous commence dans moins de {{ calendar.cancelNoticeHours }} h : il ne peut plus être annulé en ligne.</p>
-                {% elseif booking.status.blocksSlot and is_past %}
-                    <p class="details-note">Ce rendez-vous est passé.</p>
-                {% endif %}
-
-                <a class="button button-ghost" href="{{ path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">Réserver {{ booking.status.blocksSlot ? 'un autre' : 'un nouveau' }} créneau</a>
-            </div>
-        </div>
+        <a class="button button-ghost" href="{{ public_path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">Réserver {{ booking.status.blocksSlot ? 'un autre' : 'un nouveau' }} créneau</a>
     </div>
-</main>
-
-{{ include('_footer.html.twig') }}
+</div>
 {% endblock %}

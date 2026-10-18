@@ -25,8 +25,8 @@ class Company
 
     /** Adresses de l'appli, interdites comme lien d'entreprise */
     public const array RESERVED_SLUGS = [
-        'admin', 'api', 'assets', 'bundles', 'connexion', 'deconnexion', 'espace', 'inscription',
-        'kairos', 'mot-de-passe-oublie', 'rendez-vous', 'reserver', 'uploads', 'verification',
+        'admin', 'api', 'assets', 'bundles', 'connexion', 'deconnexion', 'demo', 'espace', 'inscription',
+        'integration', 'kairos', 'mot-de-passe-oublie', 'rendez-vous', 'reserver', 'uploads', 'verification',
     ];
 
     #[ORM\Id]
@@ -52,6 +52,9 @@ class Company
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Length(max: 255)]
     private ?string $address = null;
+
+    /** Contraste minimal de la couleur d'accent avec le fond clair, pour que boutons et liens restent lisibles */
+    public const float MIN_ACCENT_CONTRAST = 3.0;
 
     /** Couleur d'accent de la page publique */
     #[ORM\Column(length: 7)]
@@ -110,6 +113,30 @@ class Company
                 ->atPath('slug')
                 ->addViolation();
         }
+    }
+
+    #[Assert\Callback]
+    public function validateAccentColor(ExecutionContextInterface $context): void
+    {
+        if (preg_match('/^#[0-9a-fA-F]{6}$/', $this->accentColor) && self::contrastWithLight($this->accentColor) < self::MIN_ACCENT_CONTRAST) {
+            $context->buildViolation('Cette couleur est trop claire : le texte blanc des boutons ne serait pas lisible. Choisissez une teinte plus foncée.')
+                ->atPath('accentColor')
+                ->addViolation();
+        }
+    }
+
+    /** Rapport de contraste WCAG entre une couleur #RRGGBB et le fond clair des pages (#fffdf8) */
+    public static function contrastWithLight(string $hex): float
+    {
+        $channel = static function (string $pair): float {
+            $c = hexdec($pair) / 255;
+
+            return $c <= 0.04045 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+        };
+        $luminance = 0.2126 * $channel(substr($hex, 1, 2)) + 0.7152 * $channel(substr($hex, 3, 2)) + 0.0722 * $channel(substr($hex, 5, 2));
+        $light = 0.2126 * $channel('ff') + 0.7152 * $channel('fd') + 0.0722 * $channel('f8');
+
+        return ($light + 0.05) / ($luminance + 0.05);
     }
 
     public function getId(): ?int

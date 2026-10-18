@@ -1,43 +1,58 @@
-{% extends 'base.html.twig' %}
+{% extends 'booking/_layout.html.twig' %}
 
 {% block title %}{{ company.name }} · Réservation en ligne{% endblock %}
 {% block description %}Réservez un rendez-vous avec {{ company.name }} en ligne.{% endblock %}
 
-{% block body %}
-{{ include('_header.html.twig') }}
-
-<main class="page">
-    <div class="container">
-        <p class="eyebrow">Réservation en ligne</p>
+{% block content %}
+<div class="company-hero">
+    {{ include('booking/_logo.html.twig', {large: true}) }}
+    <div>
+        <p class="eyebrow">Prendre rendez-vous</p>
         <h1 class="page-title">{{ company.name }}</h1>
         {% if company.description %}
             <p class="page-lede">{{ company.description }}</p>
         {% endif %}
-        {% if company.address %}
-            <p class="page-meta">{{ company.address }}</p>
-        {% endif %}
-
-        {% if calendars is empty %}
-            <p class="empty">Aucun agenda n'est ouvert à la réservation pour le moment.</p>
-        {% else %}
-            <h2 class="section-title">Avec qui souhaitez-vous prendre rendez-vous ?</h2>
-            <ul class="services">
-                {% for calendar in calendars %}
-                    <li>
-                        <a class="service-card" href="{{ path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">
-                            <span class="service-name">{{ calendar.name }}</span>
-                            {% if calendar.description %}
-                                <span class="service-description">{{ calendar.description }}</span>
-                            {% endif %}
-                            <span class="service-duration">{{ calendar.offeredServices|length }} prestation{{ calendar.offeredServices|length > 1 ? 's' }}</span>
-                            <span class="service-cta">Voir les disponibilités →</span>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+        {% if company.address and not is_embed() %}
+            <p class="company-facts"><span>📍 {{ company.address }}</span></p>
         {% endif %}
     </div>
-</main>
+</div>
 
-{{ include('_footer.html.twig') }}
+{% if calendars is empty %}
+    <p class="empty">Aucun agenda n'est ouvert à la réservation pour le moment.</p>
+{% else %}
+    <h2 class="section-title">Avec qui souhaitez-vous prendre rendez-vous ?</h2>
+    <ul class="services">
+        {% for calendar in calendars %}
+            {% set offered = calendar.offeredServices %}
+            <li>
+                <a class="service-card calendar-card" href="{{ public_path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">
+                    <span class="calendar-card-head">
+                        <span class="monogram" aria-hidden="true">{{ calendar.name|first|upper }}</span>
+                        <span class="service-name">{{ calendar.name }}</span>
+                    </span>
+                    {% if calendar.description %}
+                        <span class="service-description">{{ calendar.description }}</span>
+                    {% endif %}
+                    {% if offered is not empty %}
+                        <ul class="calendar-services">
+                            {% for service in offered|slice(0, 3) %}
+                                <li>{{ service.name }}</li>
+                            {% endfor %}
+                            {% if offered|length > 3 %}
+                                <li>et {{ offered|length - 3 }} autre{{ offered|length - 3 > 1 ? 's' }}</li>
+                            {% endif %}
+                        </ul>
+                        {% set cheapest = offered|map(s => s.priceCents)|sort|first %}
+                        <span class="service-duration">
+                            {{ offered|length }} prestation{{ offered|length > 1 ? 's' }}
+                            · {{ cheapest > 0 ? 'à partir de ' ~ cheapest|price : 'dont une gratuite' }}
+                        </span>
+                    {% endif %}
+                    <span class="service-cta">Voir les disponibilités →</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
 {% endblock %}

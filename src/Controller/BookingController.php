@@ -15,6 +15,7 @@ use App\Scheduling\BookingManager;
 use App\Scheduling\SlotFinder;
 use App\Scheduling\SlotUnavailableException;
 use App\Twig\DisplayTimezone;
+use App\Twig\PublicPathExtension;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockInterface;
@@ -28,20 +29,26 @@ use Symfony\Component\Routing\Attribute\Route;
  *
  * Ces adresses attrapent tout ce qui ressemble à un lien d'entreprise : leur priorité négative les fait passer
  * après les routes de l'appli (/admin, /connexion…), dont les noms sont par ailleurs réservés (Company::RESERVED_SLUGS).
+ *
+ * Chaque page a une jumelle sous /integration, affichée dans l'iframe du site de l'entreprise (voir PublicPathExtension).
+ * Le parcours n'utilise pas la session : dans l'iframe d'un autre site, son cookie n'est pas envoyé.
  */
 final class BookingController extends AbstractController
 {
     private const array SLUG = ['company' => Company::SLUG_PATTERN, 'calendar' => Company::SLUG_PATTERN];
+    private const array EMBED = ['_embed' => true];
 
     public function __construct(
         private readonly CompanyRepository $companies,
         private readonly CalendarRepository $calendars,
         private readonly ServiceRepository $services,
         private readonly DisplayTimezone $displayTimezone,
+        private readonly PublicPathExtension $publicPaths,
     ) {
     }
 
     #[Route('/{company}', name: 'app_company', requirements: self::SLUG, methods: ['GET'], priority: -10)]
+    #[Route('/integration/{company}', name: 'app_company_embed', requirements: self::SLUG, defaults: self::EMBED, methods: ['GET'], priority: -5)]
     public function company(string $company): Response
     {
         $company = $this->findCompany($company);
@@ -53,6 +60,7 @@ final class BookingController extends AbstractController
     }
 
     #[Route('/{company}/{calendar}', name: 'app_calendar', requirements: self::SLUG, methods: ['GET'], priority: -10)]
+    #[Route('/integration/{company}/{calendar}', name: 'app_calendar_embed', requirements: self::SLUG, defaults: self::EMBED, methods: ['GET'], priority: -5)]
     public function calendar(string $company, string $calendar): Response
     {
         $calendar = $this->findCalendar($company, $calendar);
@@ -65,8 +73,15 @@ final class BookingController extends AbstractController
     }
 
     #[Route('/{company}/{calendar}/{service}', name: 'app_booking_agenda', requirements: self::SLUG + ['service' => '\d+'], methods: ['GET'], priority: -10)]
-    public function agenda(string $company, string $calendar, int $service, SlotFinder $slotFinder, #[MapQueryParameter] ?string $semaine = null): Response
-    {
+    #[Route('/integration/{company}/{calendar}/{service}', name: 'app_booking_agenda_embed', requirements: self::SLUG + ['service' => '\d+'], defaults: self::EMBED, methods: ['GET'], priority: -5)]
+    public function agenda(
+        string $company,
+        string $calendar,
+        int $service,
+        SlotFinder $slotFinder,
+        #[MapQueryParameter] ?string $semaine = null,
+        #[MapQueryParameter] bool $indisponible = false,
+    ): Response {
         $calendar = $this->findCalendar($company, $calendar);
         $service = $this->findService($calendar, $service);
 
@@ -91,10 +106,13 @@ final class BookingController extends AbstractController
             'days' => $slotFinder->week($calendar, $service, $week),
             'previous_week' => $previous >= $firstWeek ? $previous : null,
             'next_week' => $next <= $lastWeek ? $next : null,
+            // Renvoyé ici parce que le créneau choisi venait d'être pris
+            'slot_taken' => $indisponible,
         ]);
     }
 
     #[Route('/{company}/{calendar}/{service}/creneau', name: 'app_booking_new', requirements: self::SLUG + ['service' => '\d+'], methods: ['GET', 'POST'], priority: -10)]
+    #[Route('/integration/{company}/{calendar}/{service}/creneau', name: 'app_booking_new_embed', requirements: self::SLUG + ['service' => '\d+'], defaults: self::EMBED, methods: ['GET', 'POST'], priority: -5)]
     public function new(
         string $company,
         string $calendar,
@@ -111,7 +129,7 @@ final class BookingController extends AbstractController
         // ?debut=2026-10-19T10:00, en heure locale de l'entreprise
         $start = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $debut, $calendar->getDateTimeZone());
         if (false === $start) {
-            return $this->redirectToRoute('app_booking_agenda', $this->routeParams($calendar, $service));
+            return $this->redirectToPublic('app_booking_agenda', $this->routeParams($calendar, $service));
         }
 
         if (!$slotFinder->isFree($calendar, $service, $start)) {
@@ -136,7 +154,7 @@ final class BookingController extends AbstractController
 
             $mailer->sendConfirmation($booking);
 
-            return $this->redirectToRoute('app_booking_show', ['token' => $booking->getCancelToken()]);
+            return $this->redirectToPublic('app_booking_show', ['token' => $booking->getCancelToken()]);
         }
 
         return $this->render('booking/new.html.twig', [
@@ -150,6 +168,7 @@ final class BookingController extends AbstractController
 
     /** La page du rendez-vous, connue du seul client : son adresse contient le jeton secret */
     #[Route('/rendez-vous/{token<[a-f0-9]{64}>}', name: 'app_booking_show', methods: ['GET'])]
+    #[Route('/integration/rendez-vous/{token<[a-f0-9]{64}>}', name: 'app_booking_show_embed', defaults: self::EMBED, methods: ['GET'])]
     public function show(
         #[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking,
         BookingManager $bookingManager,
@@ -167,6 +186,7 @@ final class BookingController extends AbstractController
     }
 
     #[Route('/rendez-vous/{token<[a-f0-9]{64}>}/annuler', name: 'app_booking_cancel', methods: ['POST'])]
+    #[Route('/integration/rendez-vous/{token<[a-f0-9]{64}>}/annuler', name: 'app_booking_cancel_embed', defaults: self::EMBED, methods: ['POST'])]
     public function cancel(
         #[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking,
         Request $request,
@@ -177,14 +197,12 @@ final class BookingController extends AbstractController
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
+        // Trop tard pour annuler : la page du rendez-vous l'explique d'elle-même
         if ($bookingManager->cancel($booking)) {
             $mailer->sendCancellation($booking);
-            $this->addFlash('success', 'Votre rendez-vous est annulé. Un e-mail de confirmation vous a été envoyé.');
-        } elseif ($booking->getStatus()->blocksSlot()) {
-            $this->addFlash('warning', sprintf('Ce rendez-vous commence dans moins de %d h : il ne peut plus être annulé en ligne.', $booking->getCalendar()->getCancelNoticeHours()));
         }
 
-        return $this->redirectToRoute('app_booking_show', ['token' => $booking->getCancelToken()]);
+        return $this->redirectToPublic('app_booking_show', ['token' => $booking->getCancelToken()]);
     }
 
     /** L'entreprise publique à cette adresse ; ses dates s'affichent dans son fuseau */
@@ -222,11 +240,20 @@ final class BookingController extends AbstractController
 
     private function backToAgenda(Calendar $calendar, Service $service, \DateTimeImmutable $start): Response
     {
-        $this->addFlash('warning', 'Ce créneau n\'est plus disponible. Choisissez-en un autre.');
-
-        return $this->redirectToRoute('app_booking_agenda', [
+        return $this->redirectToPublic('app_booking_agenda', [
             ...$this->routeParams($calendar, $service),
             'semaine' => $start->format('Y-m-d'),
+            'indisponible' => 1,
         ]);
+    }
+
+    /**
+     * Redirige en restant dans la version de la page (Kairos ou intégrée)
+     *
+     * @param array<string, mixed> $parameters
+     */
+    private function redirectToPublic(string $route, array $parameters): Response
+    {
+        return $this->redirectToRoute($this->publicPaths->route($route), $parameters);
     }
 }

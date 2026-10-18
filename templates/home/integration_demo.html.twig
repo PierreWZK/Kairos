@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Démo d'intégration · Kairos{% endblock %}
+{% block description %}Un exemple de site d'entreprise qui affiche son calendrier de réservation Kairos.{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{# Un site externe ne suit pas le thème sombre de Kairos #}
+{% block html_attributes %} data-theme="light"{% endblock %}
+
+{% set embed_url = url('app_company_embed', {company: company.slug}) %}
+
+{% block body %}
+<div class="demo-banner">
+    <div class="container">
+        <span>Exemple : le site (fictif) de {{ company.name }}, avec son calendrier Kairos intégré.</span>
+        <a href="{{ path('app_home') }}#integration">← Retour à Kairos</a>
+    </div>
+</div>
+
+<div class="external-site">
+    <header class="external-hero">
+        <div class="container">
+            <nav class="external-nav" aria-label="Menu du site d'exemple">
+                <span>Le salon</span>
+                <span>Tarifs</span>
+                <span>Rendez-vous</span>
+                <span>Contact</span>
+            </nav>
+            <h1>{{ company.name }}</h1>
+            {% if company.description %}
+                <p>{{ company.description }}</p>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="external-section">
+        <div class="container">
+            <h2>Prendre rendez-vous</h2>
+            <div class="external-widget">
+                {# Exactement le code fourni à l'entreprise #}
+                <div data-kairos="{{ embed_url }}">
+                    <a href="{{ url('app_company', {company: company.slug}) }}">Prendre rendez-vous en ligne</a>
+                </div>
+                <script src="{{ asset('embed.js') }}" async></script>
+            </div>
+        </div>
+    </section>
+
+    <footer class="external-footer">
+        {{ company.name }}{% if company.address %} · {{ company.address }}{% endif %}
+    </footer>
+</div>
+
+<section class="demo-code">
+    <div class="container">
+        <p class="eyebrow">Le code collé sur ce site</p>
+        <p class="code-label">Trois lignes à placer où le calendrier doit apparaître. Il prend toute la largeur disponible et s'ajuste en hauteur.</p>
+        {{ include('integration/_snippet.html.twig', {embed_url: embed_url, page_url: url('app_company', {company: company.slug})}) }}
+    </div>
+</section>
+{% endblock %}

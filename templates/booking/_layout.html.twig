@@ -1,0 +1,60 @@
+{#
+ # Mise en page des pages d'une entreprise (variable attendue « company ») : à ses couleurs, avec son nom en tête.
+ # Dans l'iframe d'un site externe (/integration/…), elle perd en-tête et pied de page, reste en thème clair,
+ # et donne sa hauteur à la page qui l'accueille (public/embed.js) pour s'afficher sans barre de défilement.
+ #}
+{% extends 'base.html.twig' %}
+
+{% block html_attributes %}{% if is_embed() %} class="is-embed" data-theme="light"{% endif %}{% endblock %}
+
+{% block meta %}
+    {% if is_embed() %}
+        <meta name="robots" content="noindex">
+    {% endif %}
+{% endblock %}
+
+{% block body_attributes %} class="branded" style="--brand: {{ company.accentColor }}"{% endblock %}
+
+{% block body %}
+{% if not is_embed() %}
+    <header class="company-header">
+        <div class="container company-header-inner">
+            <a class="company-brand" href="{{ path('app_company', {company: company.slug}) }}">
+                {{ include('booking/_logo.html.twig') }}
+                {{ company.name }}
+            </a>
+            <span class="company-header-note">Réservation en ligne</span>
+        </div>
+    </header>
+{% endif %}
+
+<main class="page{{ is_embed() ? ' page-embed' }}">
+    <div class="container">
+        {% block content %}{% endblock %}
+
+        {% if not is_embed() %}
+            <p class="powered">Réservation en ligne avec <a href="{{ path('app_home') }}">Kairos</a></p>
+        {% endif %}
+    </div>
+</main>
+
+{% if is_embed() %}
+    <p class="embed-credit">Réservation en ligne avec <a href="{{ url('app_home') }}" target="_blank" rel="noopener">Kairos</a></p>
+    <script>
+        // Donne la hauteur de la page au site qui l'intègre, à chaque changement (agenda d'une autre semaine, erreurs…)
+        (function () {
+            if (window.parent === window) {
+                return;
+            }
+            var root = document.documentElement;
+            var send = function (type) {
+                window.parent.postMessage({ kairos: type, height: Math.ceil(root.getBoundingClientRect().height) }, '*');
+            };
+            new ResizeObserver(function () { send('resize'); }).observe(root);
+            send('load');
+        })();
+    </script>
+{% else %}
+    {{ include('_footer.html.twig') }}
+{% endif %}
+{% endblock %}

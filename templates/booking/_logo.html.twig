@@ -1,0 +1,6 @@
+{# Logo de l'entreprise, ou son initiale à sa couleur. Variables : company, large (facultatif) #}
+{% if company.logoFilename %}
+    <img class="company-logo" src="{{ asset('uploads/logos/' ~ company.logoFilename) }}" alt="">
+{% else %}
+    <span class="monogram{{ large|default(false) ? ' monogram-large' }}" aria-hidden="true">{{ company.name|first|upper }}</span>
+{% endif %}

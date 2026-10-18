@@ -224,7 +224,7 @@ final class BookingFlowTest extends WebTestCase
 
         $this->client->request('GET', sprintf('/salon-lumiere/julie/%d/creneau?debut=%sT10:00', $service->getId(), self::NEXT_MONDAY));
 
-        self::assertResponseRedirects(sprintf('/salon-lumiere/julie/%d?semaine=%s', $service->getId(), self::NEXT_MONDAY));
+        self::assertResponseRedirects(sprintf('/salon-lumiere/julie/%d?semaine=%s&indisponible=1', $service->getId(), self::NEXT_MONDAY));
         $this->client->followRedirect();
         self::assertSelectorTextContains('.flash-warning', 'n\'est plus disponible');
     }
