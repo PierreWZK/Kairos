@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Booking;
 use App\Enum\BookingStatus;
 use App\Notification\BookingMailer;
+use App\Twig\CompanyTime;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -35,12 +36,6 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
  */
 final class BookingCrudController extends AbstractCrudController
 {
-    /** Choix du filtre par statut : les valeurs stockées en base */
-    private const array STATUS_FILTER_CHOICES = [
-        'Confirmée' => 'confirmed',
-        'Annulée' => 'cancelled',
-    ];
-
     public function __construct(
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
@@ -59,22 +54,33 @@ final class BookingCrudController extends AbstractCrudController
             ->setPageTitle(Crud::PAGE_INDEX, 'Réservations')
             ->setPageTitle(Crud::PAGE_DETAIL, static fn (Booking $booking): string => (string) $booking)
             ->setDefaultSort(['startsAt' => 'DESC'])
-            ->setSearchFields(['customerName', 'customerEmail', 'customerPhone'])
+            ->setSearchFields(['customerName', 'customerEmail', 'customerPhone', 'calendar.name', 'calendar.company.name'])
             ->setDefaultRowAction(Action::DETAIL);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield FormField::addFieldset('Rendez-vous')->hideOnForm();
-        yield DateTimeField::new('startsAt', 'Début')->setFormat('EEE d MMM y, HH:mm')->hideOnForm();
-        yield DateTimeField::new('endsAt', 'Fin')->setFormat('HH:mm')->onlyOnDetail();
-        yield AssociationField::new('calendar', 'Calendrier')->hideOnForm();
-        yield TextField::new('company', 'Entreprise')->hideOnForm()->hideOnIndex();
+        // À l'heure locale de l'entreprise (CompanyTime), pas à celle de Paris
+        yield DateTimeField::new('startsAt', 'Début')
+            ->formatValue(static fn ($value, Booking $booking): string => CompanyTime::format($value, $booking->getCalendar()))
+            ->hideOnForm();
+        yield DateTimeField::new('endsAt', 'Fin')
+            ->formatValue(static fn ($value, Booking $booking): string => CompanyTime::format($value, $booking->getCalendar(), 'HH:mm'))
+            ->onlyOnDetail();
+        yield AssociationField::new('calendar', 'Entreprise · calendrier')
+            ->formatValue(static fn ($value, Booking $booking): string => CompanyTime::calendarLabel($booking->getCalendar()))
+            ->hideOnForm();
         yield AssociationField::new('service', 'Prestation')->hideOnForm();
         // Choix déduits de l'enum (mapping Doctrine) ; libellés fournis par BookingStatus::trans()
         yield ChoiceField::new('status', 'Statut')
             // Avec un enum traduisible, EasyAdmin indexe les badges par le nom du cas
-            ->renderAsBadges([BookingStatus::Confirmed->name => 'success', BookingStatus::Cancelled->name => 'secondary'])
+            ->renderAsBadges([
+                BookingStatus::Pending->name => 'warning',
+                BookingStatus::Confirmed->name => 'success',
+                BookingStatus::Rejected->name => 'danger',
+                BookingStatus::Cancelled->name => 'secondary',
+            ])
             ->hideOnForm();
 
         yield FormField::addFieldset('Client');
@@ -98,7 +104,8 @@ final class BookingCrudController extends AbstractCrudController
             ->renderAsForm()
             ->asDangerAction()
             ->askConfirmation('Annuler ce rendez-vous ? Le client sera prévenu par e-mail et le créneau sera libéré.', 'Oui, annuler')
-            ->displayIf(static fn (Booking $booking): bool => !$booking->isCancelled());
+            // En attente ou confirmé : un rendez-vous refusé ou annulé n'occupe déjà plus son créneau
+            ->displayIf(static fn (Booking $booking): bool => $booking->getStatus()->blocksSlot());
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
@@ -111,9 +118,12 @@ final class BookingCrudController extends AbstractCrudController
     {
         return $filters
             ->add(DateTimeFilter::new('startsAt', 'Date'))
-            ->add(EntityFilter::new('calendar', 'Calendrier'))
+            ->add(EntityFilter::new('calendar', 'Calendrier')->setFormTypeOption('value_type_options.choice_label', CompanyTime::calendarLabel(...)))
             ->add(EntityFilter::new('service', 'Prestation'))
-            ->add(ChoiceFilter::new('status', 'Statut')->setChoices(self::STATUS_FILTER_CHOICES));
+            ->add(ChoiceFilter::new('status', 'Statut')->setChoices(array_combine(
+                array_map(static fn (BookingStatus $status): string => $status->label(), BookingStatus::cases()),
+                array_map(static fn (BookingStatus $status): string => $status->value, BookingStatus::cases()),
+            )));
     }
 
     #[AdminRoute('/{id}/cancel', name: 'cancelBooking', options: ['methods' => ['POST']])]
@@ -125,7 +135,7 @@ final class BookingCrudController extends AbstractCrudController
         }
 
         // Le super-admin peut annuler à tout moment, sans le délai imposé aux clients
-        if (!$booking->isCancelled()) {
+        if ($booking->getStatus()->blocksSlot()) {
             $booking->cancel();
             $entityManager->flush();
             $mailer->sendCancellation($booking, byCompany: true);

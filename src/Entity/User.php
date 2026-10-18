@@ -147,6 +147,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return '' === $this->password;
     }
 
+    /** L'état du compte en une phrase (liste des comptes du super-admin) */
+    public function getAccountState(): string
+    {
+        return match (true) {
+            \in_array('ROLE_SUPER_ADMIN', $this->roles, true) => 'Super-admin',
+            $this->isInvitationPending() => 'Invitation en attente',
+            $this->isVerified => 'Adresse confirmée',
+            default => 'Adresse à confirmer',
+        };
+    }
+
     public function isVerified(): bool
     {
         return $this->isVerified;

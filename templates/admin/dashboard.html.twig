@@ -2,49 +2,86 @@
 
 {% block content_title %}Tableau de bord{% endblock %}
 
-{% macro booking_rows(bookings) %}
-    <table class="table datagrid">
-        <thead>
-            <tr><th>Horaire</th><th>Client</th><th>Entreprise · calendrier</th><th>Prestation</th><th></th></tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-                <tr>
-                    <td>
-                        <strong>{{ booking.startsAt|format_date(pattern: 'EEE d MMM')|capitalize }}</strong>
-                        {{ booking.startsAt|date('H:i') }} → {{ booking.endsAt|date('H:i') }}
-                    </td>
-                    <td>
-                        {{ booking.customerName }}<br>
-                        <a href="mailto:{{ booking.customerEmail }}">{{ booking.customerEmail }}</a>
-                        {% if booking.customerPhone %} · {{ booking.customerPhone }}{% endif %}
-                    </td>
-                    <td>{{ booking.company.name }} · {{ booking.calendar.name }}</td>
-                    <td>{{ booking.service.name }}</td>
-                    <td class="text-end"><a href="{{ path('admin_booking_detail', {entityId: booking.id}) }}">Voir</a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% macro figure(value, label, detail = null, url = null) %}
+    <div class="col-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">{{ value }}</div>
+                <div>{% if url %}<a href="{{ url }}">{{ label }}</a>{% else %}{{ label }}{% endif %}</div>
+                {% if detail %}<div class="text-muted small">{{ detail }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
 {% endmacro %}
 
 {% block main %}
+    <section class="row g-3 mb-5 admin-figures">
+        {{ _self.figure(figures.companies, figures.companies > 1 ? 'entreprises actives' : 'entreprise active',
+            figures.suspended ? figures.suspended ~ ' suspendue' ~ (figures.suspended > 1 ? 's') : null,
+            path('admin_company_index')) }}
+        {{ _self.figure(figures.new_companies, 'inscription' ~ (figures.new_companies > 1 ? 's') ~ ' sur 7 jours') }}
+        {{ _self.figure(figures.accounts, figures.accounts > 1 ? 'comptes d\'entreprise' : 'compte d\'entreprise',
+            figures.invitations ? figures.invitations ~ ' invitation' ~ (figures.invitations > 1 ? 's') ~ ' en attente' : null,
+            path('admin_user_index')) }}
+        {{ _self.figure(figures.upcoming, 'rendez-vous à venir',
+            figures.pending ? 'dont ' ~ figures.pending ~ ' demande' ~ (figures.pending > 1 ? 's') ~ ' à valider' : null,
+            path('admin_booking_index')) }}
+    </section>
+
     <section class="mb-5">
-        <h2 class="h5">Aujourd'hui · {{ now|format_date(pattern: 'EEEE d MMMM') }}</h2>
-        {% if today is empty %}
-            <p class="text-muted">Aucun rendez-vous à venir aujourd'hui.</p>
+        <h2 class="h5">Prochains rendez-vous</h2>
+        {% if upcoming is empty %}
+            <p class="text-muted">Aucun rendez-vous prévu.</p>
         {% else %}
-            {{ _self.booking_rows(today) }}
+            <table class="table datagrid">
+                <thead>
+                    <tr><th>Horaire (heure locale)</th><th>Client</th><th>Entreprise · calendrier</th><th>Prestation</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for booking in upcoming %}
+                        <tr>
+                            <td>
+                                {{ booking.startsAt|company_time(booking.calendar) }}
+                                {% if booking.pending %}<span class="badge badge-warning">En attente</span>{% endif %}
+                            </td>
+                            <td>
+                                {{ booking.customerName }}<br>
+                                <a href="mailto:{{ booking.customerEmail }}">{{ booking.customerEmail }}</a>
+                            </td>
+                            <td>{{ booking.company.name }} · {{ booking.calendar.name }}</td>
+                            <td>{{ booking.service.name }}</td>
+                            <td class="text-end"><a href="{{ path('admin_booking_detail', {entityId: booking.id}) }}">Voir</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p><a href="{{ path('admin_booking_index') }}">Toutes les réservations →</a></p>
         {% endif %}
     </section>
 
     <section>
-        <h2 class="h5">Prochains rendez-vous</h2>
-        {% if next is empty %}
-            <p class="text-muted">Aucun rendez-vous prévu.</p>
+        <h2 class="h5">Dernières inscriptions</h2>
+        {% if latest_companies is empty %}
+            <p class="text-muted">Aucune entreprise inscrite.</p>
         {% else %}
-            {{ _self.booking_rows(next) }}
-            <p><a href="{{ path('admin_booking_index') }}">Toutes les réservations →</a></p>
+            <table class="table datagrid">
+                <thead>
+                    <tr><th>Entreprise</th><th>Lien</th><th>Inscrite le</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for company in latest_companies %}
+                        <tr>
+                            <td>
+                                {{ company.name }}
+                                {% if company.suspended %}<span class="badge badge-secondary">Suspendue</span>{% endif %}
+                            </td>
+                            <td>/{{ company.slug }}</td>
+                            <td>{{ company.createdAt|format_date(pattern: 'd MMM y') }}</td>
+                            <td class="text-end"><a href="{{ path('admin_company_detail', {entityId: company.id}) }}">Voir</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
     </section>
 {% endblock %}

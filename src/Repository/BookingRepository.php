@@ -141,6 +141,30 @@ class BookingRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /** @return array{upcoming: int, pending: int} Les rendez-vous à venir de toute la plateforme, et les demandes parmi eux */
+    public function countUpcomingByStatus(\DateTimeImmutable $now): array
+    {
+        $rows = $this->createQueryBuilder('b')
+            ->select('b.status AS status', 'COUNT(b.id) AS total')
+            ->andWhere('b.status IN (:statuses)')
+            ->andWhere('b.endsAt > :now')
+            ->setParameter('statuses', BookingStatus::blocking())
+            ->setParameter('now', self::utc($now))
+            ->groupBy('b.status')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = ['upcoming' => 0, 'pending' => 0];
+        foreach ($rows as $row) {
+            $counts['upcoming'] += (int) $row['total'];
+            if (BookingStatus::Pending === $row['status']) {
+                $counts['pending'] = (int) $row['total'];
+            }
+        }
+
+        return $counts;
+    }
+
     /** Doctrine enregistre et compare l'heure telle quelle : les bornes doivent être en UTC, comme la base */
     private static function utc(\DateTimeImmutable $date): \DateTimeImmutable
     {

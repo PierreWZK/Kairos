@@ -6,6 +6,7 @@ use App\Entity\Company;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -46,17 +47,30 @@ final class CompanyCrudController extends AbstractCrudController
         yield ColorField::new('accentColor', 'Couleur')->hideOnIndex();
         yield TextareaField::new('description', 'Description')->hideOnIndex();
         yield TextField::new('address', 'Adresse')->hideOnIndex();
-        yield AssociationField::new('calendars', 'Calendriers')->onlyOnIndex();
-        yield AssociationField::new('users', 'Membres')->onlyOnIndex();
+        yield AssociationField::new('calendars', 'Calendriers')->hideOnForm();
+        yield AssociationField::new('users', 'Comptes')->hideOnForm();
         yield BooleanField::new('isSuspended', 'Suspendue')->renderAsSwitch();
         yield DateTimeField::new('createdAt', 'Inscrite le')->setFormat('d MMM y')->hideOnForm();
     }
 
     public function configureActions(Actions $actions): Actions
     {
+        $publicPage = Action::new('publicPage', 'Voir la page', 'fa fa-arrow-up-right-from-square')
+            ->linkToUrl(fn (Company $company): string => $this->generateUrl('app_company', ['company' => $company->getSlug()]))
+            ->setHtmlAttributes(['target' => '_blank', 'rel' => 'noopener'])
+            // Une entreprise suspendue n'a plus de page publique
+            ->displayIf(static fn (Company $company): bool => !$company->isSuspended());
+
         // Une entreprise se crée par l'inscription, et ne se supprime pas d'ici (on la suspend)
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->add(Crud::PAGE_INDEX, $publicPage)
+            ->add(Crud::PAGE_DETAIL, $publicPage)
             ->disable(Action::NEW, Action::DELETE);
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters->add('isSuspended')->add('timezone')->add('createdAt');
     }
 }

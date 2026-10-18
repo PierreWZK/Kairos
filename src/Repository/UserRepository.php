@@ -29,4 +29,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->flush();
     }
+
+    /** @return array{accounts: int, invitations: int} Les comptes d'entreprise, dont les invitations pas encore acceptées */
+    public function countCompanyAccounts(): array
+    {
+        $row = $this->createQueryBuilder('u')
+            ->select('COUNT(u.id) AS accounts', "SUM(CASE WHEN u.password = '' THEN 1 ELSE 0 END) AS invitations")
+            ->andWhere('u.company IS NOT NULL')
+            ->getQuery()
+            ->getSingleResult();
+
+        return ['accounts' => (int) $row['accounts'], 'invitations' => (int) $row['invitations']];
+    }
 }

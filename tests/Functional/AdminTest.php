@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use App\Enum\CompanyRole;
 use App\Repository\BookingRepository;
 use App\Repository\ServiceRepository;
 use App\Tests\AgendaTestTrait;
@@ -51,6 +52,10 @@ final class AdminTest extends WebTestCase
     {
         $calendar = $this->createAgenda();
         $this->createBooking($calendar, $calendar->getServices()->first(), self::NEXT_MONDAY.' 10:00');
+        // Une ligne de chaque sorte dans les listes : un propriétaire, un membre
+        $this->createMember($calendar->getCompany());
+        $this->createMember($calendar->getCompany(), CompanyRole::Member, 'marc@salon.test')->addCalendar($calendar);
+        $this->entityManager()->flush();
         $this->client->loginUser($this->createSuperAdmin());
 
         $this->client->request('GET', $url);
@@ -64,12 +69,49 @@ final class AdminTest extends WebTestCase
     {
         yield ['/admin', 'Tableau de bord'];
         yield ['/admin/company', 'Entreprises'];
+        yield ['/admin/user', 'Comptes'];
         yield ['/admin/calendar', 'Calendriers'];
         yield ['/admin/booking', 'Réservations'];
         yield ['/admin/service', 'Prestations'];
         yield ['/admin/opening-hour', 'Horaires d\'ouverture'];
         yield ['/admin/time-off', 'Fermetures'];
-        yield ['/admin/time-off/new', 'Fermeture'];
+    }
+
+    /** Les fermetures et les comptes se gèrent depuis l'espace de chaque entreprise */
+    public function testTimeOffAndAccountsAreOnlyConsulted(): void
+    {
+        $this->client->loginUser($this->createSuperAdmin());
+
+        foreach (['/admin/time-off/new', '/admin/user/new'] as $url) {
+            $this->client->request('GET', $url);
+            self::assertResponseStatusCodeSame(403, $url);
+        }
+    }
+
+    public function testTheDashboardShowsPlatformFiguresAndLocalTimes(): void
+    {
+        $salon = $this->createAgenda();
+        $this->createMember($salon->getCompany());
+        $toronto = $this->createCompany('Studio Érable', 'studio-erable', 'America/Toronto');
+        $studio = $this->createCalendar($toronto, [$this->createService($toronto, 'Cours privé')], 'studio');
+        $booking = (new \App\Entity\Booking())
+            ->setCalendar($studio)
+            ->setService($studio->getServices()->first())
+            ->setStartsAt(new \DateTimeImmutable('2026-10-26 09:00', new \DateTimeZone('America/Toronto')))
+            ->setCustomerName('Léa Tremblay')
+            ->setCustomerEmail('lea@example.com');
+        $this->entityManager()->persist($booking);
+        $this->entityManager()->flush();
+        $this->client->loginUser($this->createSuperAdmin());
+
+        $this->client->request('GET', '/admin');
+
+        self::assertSelectorTextContains('.admin-figures', '2 entreprises actives');
+        self::assertSelectorTextContains('.admin-figures', '1 compte d\'entreprise');
+        self::assertSelectorTextContains('.admin-figures', '1 rendez-vous à venir');
+        // 9 h à Toronto, pas 15 h à Paris
+        self::assertSelectorTextContains('#main', 'Lun. 26 oct. 2026, 09:00 (heure de Toronto)');
+        self::assertSelectorTextContains('#main', 'Studio Érable');
     }
 
     public function testBookingsCanNeitherBeCreatedNorDeleted(): void

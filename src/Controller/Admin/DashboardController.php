@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Repository\BookingRepository;
+use App\Repository\CompanyRepository;
+use App\Repository\UserRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -16,30 +18,29 @@ final class DashboardController extends AbstractDashboardController
 {
     public function __construct(
         private readonly BookingRepository $bookings,
+        private readonly CompanyRepository $companies,
+        private readonly UserRepository $users,
         private readonly ClockInterface $clock,
     ) {
     }
 
-    /** Accueil du back-office : les rendez-vous du jour et les suivants */
+    /**
+     * Accueil du super-admin : les chiffres de la plateforme, les dernières inscriptions et les prochains
+     * rendez-vous, chacun à l'heure locale de son entreprise.
+     */
     public function index(): Response
     {
         $now = $this->clock->now();
-        $tomorrow = $now->setTime(0, 0)->modify('+1 day');
-
-        $today = [];
-        $next = [];
-        foreach ($this->bookings->findUpcoming($now, 15) as $booking) {
-            if ($booking->getStartsAt() < $tomorrow) {
-                $today[] = $booking;
-            } else {
-                $next[] = $booking;
-            }
-        }
-
         return $this->render('admin/dashboard.html.twig', [
-            'now' => $now,
-            'today' => $today,
-            'next' => \array_slice($next, 0, 10),
+            'figures' => [
+                'companies' => $this->companies->count(['isSuspended' => false]),
+                'suspended' => $this->companies->count(['isSuspended' => true]),
+                'new_companies' => $this->companies->countCreatedSince($now->modify('-7 days')),
+                ...$this->users->countCompanyAccounts(),
+                ...$this->bookings->countUpcomingByStatus($now),
+            ],
+            'latest_companies' => $this->companies->findBy([], ['createdAt' => 'DESC'], 5),
+            'upcoming' => $this->bookings->findUpcoming($now, 12),
         ]);
     }
 
@@ -62,6 +63,7 @@ final class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Plateforme');
         yield MenuItem::linkTo(CompanyCrudController::class, 'Entreprises', 'fa fa-building');
+        yield MenuItem::linkTo(UserCrudController::class, 'Comptes', 'fa fa-users');
         yield MenuItem::linkTo(CalendarCrudController::class, 'Calendriers', 'fa fa-calendar');
 
         yield MenuItem::section('Agenda');

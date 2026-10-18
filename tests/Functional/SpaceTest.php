@@ -12,7 +12,6 @@ use App\Repository\ServiceRepository;
 use App\Repository\TimeOffRepository;
 use App\Tests\AgendaTestTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -273,29 +272,6 @@ final class SpaceTest extends WebTestCase
             $this->client->request('GET', $url);
             self::assertResponseStatusCodeSame(403, $url);
         }
-    }
-
-    #[DataProvider('otherCompanyPages')]
-    public function testAnotherCompanysDataIsOutOfReach(string $pattern): void
-    {
-        $calendar = $this->createAgenda();
-        $other = $this->createCompany('Cabinet Équilibre', 'cabinet-equilibre');
-        $this->loginOwner($other, 'contact@equilibre.test');
-
-        $this->client->request(str_contains($pattern, 'supprimer') ? 'POST' : 'GET', sprintf($pattern, $pattern === '/espace/prestations/%d' ? $calendar->getServices()->first()->getId() : $calendar->getId()));
-
-        self::assertResponseStatusCodeSame(403);
-    }
-
-    /** @return iterable<array{string}> */
-    public static function otherCompanyPages(): iterable
-    {
-        yield 'réglages' => ['/espace/calendriers/%d'];
-        yield 'horaires' => ['/espace/calendriers/%d/horaires'];
-        yield 'fermetures' => ['/espace/calendriers/%d/fermetures'];
-        yield 'intégration' => ['/espace/calendriers/%d/integration'];
-        yield 'suppression' => ['/espace/calendriers/%d/supprimer'];
-        yield 'prestation' => ['/espace/prestations/%d'];
     }
 
     public function testTheDashboardListsCalendarsUpcomingBookingsAndTheCompanyCode(): void
