@@ -1,12 +1,14 @@
 # Kairos · Réserver le bon moment
 
-> Jour 05 du défi **30 jours, 30 projets** · Symfony 8, Twig, Doctrine, EasyAdmin 5, MySQL
+> Jour 05 du défi **30 jours, 30 projets** · Symfony 8, Twig, Doctrine, EasyAdmin 5, MySQL · 🟢 **En ligne : [kairos.projectp.fr](https://kairos.projectp.fr)**
+
+![Page d'accueil de Kairos](docs/preview.png)
 
 Kairos est une plateforme de **réservation de créneaux en ligne** pour les entreprises de rendez-vous : salons de coiffure, cabinets, coachs, professeurs particuliers… Une entreprise s'inscrit, crée ses calendriers (une personne, une salle, un lieu), et ses clients réservent **sans créer de compte**, sur la page Kairos de l'entreprise ou **directement sur son propre site**.
 
 Le nom vient du grec ancien *kairos*, « le moment opportun », par opposition à *chronos*, le temps qui s'écoule.
 
-🌐 **En ligne :** [kairos.projectp.fr](https://kairos.projectp.fr) · 🔗 **Code :** [github.com/PierreWZK/Kairos](https://github.com/PierreWZK/Kairos)
+🔗 **Code :** [github.com/PierreWZK/Kairos](https://github.com/PierreWZK/Kairos)
 
 **Essayer sans s'inscrire** : réservez sur [Salon Lumière](https://kairos.projectp.fr/salon-lumiere), ou connectez-vous à son espace avec `julie@salon-lumiere.test` / `kairos-demo` (propriétaire) ou `marc@salon-lumiere.test` / `kairos-demo` (membre). La démo est remise à zéro chaque nuit.
 
