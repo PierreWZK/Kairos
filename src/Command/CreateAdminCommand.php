@@ -12,10 +12,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * Crée le compte du professionnel, ou change son mot de passe s'il existe déjà.
+ * Crée le compte super-admin de la plateforme (accès à /admin), ou change son mot de passe s'il existe déjà.
  * Le mot de passe est demandé de façon masquée : il n'apparaît ni à l'écran ni dans l'historique du terminal.
  */
-#[AsCommand(name: 'app:create-admin', description: 'Crée un compte du back-office (ou change son mot de passe)')]
+#[AsCommand(name: 'app:create-admin', description: 'Crée le compte super-admin (ou change son mot de passe)')]
 final class CreateAdminCommand
 {
     public function __construct(
@@ -43,9 +43,10 @@ final class CreateAdminCommand
 
         $user = $this->users->findOneBy(['email' => mb_strtolower(trim($email))]);
         $isNew = null === $user;
-        $user ??= (new User())->setEmail($email);
+        $user ??= (new User())->setEmail($email)->setName('Super-admin');
 
-        $user->setRoles(['ROLE_ADMIN'])
+        $user->setRoles(['ROLE_SUPER_ADMIN'])
+            ->setIsVerified(true)
             ->setPassword($this->passwordHasher->hashPassword($user, $password));
 
         $this->entityManager->persist($user);

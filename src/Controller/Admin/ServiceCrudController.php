@@ -7,6 +7,7 @@ use App\Repository\BookingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
@@ -34,12 +35,13 @@ final class ServiceCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('Prestation')
             ->setEntityLabelInPlural('Prestations')
             ->setPageTitle(Crud::PAGE_INDEX, 'Prestations')
-            ->setDefaultSort(['durationMinutes' => 'ASC'])
+            ->setDefaultSort(['company' => 'ASC', 'durationMinutes' => 'ASC'])
             ->setSearchFields(['name', 'description']);
     }
 
     public function configureFields(string $pageName): iterable
     {
+        yield AssociationField::new('company', 'Entreprise');
         yield TextField::new('name', 'Nom');
         yield IntegerField::new('durationMinutes', 'Durée (minutes)')
             ->setHelp('Un créneau n\'est proposé que si la prestation y tient en entier.');

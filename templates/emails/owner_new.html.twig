@@ -1,7 +1,11 @@
 {% extends 'emails/_layout.html.twig' %}
 
 {% block content %}
-    <p style="margin:0;"><strong>{{ booking.customerName }}</strong> vient de réserver :</p>
+    {% if booking.status.value == 'pending' %}
+        <p style="margin:0;"><strong>{{ booking.customerName }}</strong> demande un rendez-vous. Il attend votre validation dans votre espace Kairos :</p>
+    {% else %}
+        <p style="margin:0;"><strong>{{ booking.customerName }}</strong> vient de réserver :</p>
+    {% endif %}
 
     {{ include('emails/_booking_card.html.twig') }}
 

@@ -5,7 +5,7 @@
 {% macro booking_rows(bookings) %}
     <table class="table datagrid">
         <thead>
-            <tr><th>Horaire</th><th>Client</th><th>Prestation</th><th></th></tr>
+            <tr><th>Horaire</th><th>Client</th><th>Entreprise · calendrier</th><th>Prestation</th><th></th></tr>
         </thead>
         <tbody>
             {% for booking in bookings %}
@@ -19,6 +19,7 @@
                         <a href="mailto:{{ booking.customerEmail }}">{{ booking.customerEmail }}</a>
                         {% if booking.customerPhone %} · {{ booking.customerPhone }}{% endif %}
                     </td>
+                    <td>{{ booking.company.name }} · {{ booking.calendar.name }}</td>
                     <td>{{ booking.service.name }}</td>
                     <td class="text-end"><a href="{{ path('admin_booking_detail', {entityId: booking.id}) }}">Voir</a></td>
                 </tr>

@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Repository\BookingRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -45,13 +46,23 @@ final class DashboardController extends AbstractDashboardController
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
-            ->setTitle('<strong>Kairos</strong> · espace pro')
+            ->setTitle('<strong>Kairos</strong> · super-admin')
             ->setTranslationDomain('admin');
+    }
+
+    /** Dates stockées en UTC, affichées à l'heure de Paris dans tout le back-office */
+    public function configureCrud(): Crud
+    {
+        return parent::configureCrud()->setTimezone('Europe/Paris');
     }
 
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-gauge');
+
+        yield MenuItem::section('Plateforme');
+        yield MenuItem::linkTo(CompanyCrudController::class, 'Entreprises', 'fa fa-building');
+        yield MenuItem::linkTo(CalendarCrudController::class, 'Calendriers', 'fa fa-calendar');
 
         yield MenuItem::section('Agenda');
         yield MenuItem::linkTo(BookingCrudController::class, 'Réservations', 'fa fa-calendar-check');

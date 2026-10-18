@@ -13,8 +13,9 @@ class Kernel extends BaseKernel
     {
         parent::boot();
 
-        // L'agenda raisonne en heure locale : on ne dépend pas du date.timezone du serveur
-        date_default_timezone_set($this->getContainer()->getParameter('app.timezone'));
+        // Stockage et calculs en UTC, quel que soit le date.timezone du serveur. Chaque entreprise a son fuseau :
+        // les horaires d'ouverture sont exprimés dedans, et l'affichage s'y fait (voir Twig\DisplayTimezone).
+        date_default_timezone_set('UTC');
     }
 
     /**

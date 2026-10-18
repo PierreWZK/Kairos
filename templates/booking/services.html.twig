@@ -1,23 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Choisir une prestation · Kairos{% endblock %}
+{% block title %}{{ calendar.name }} · {{ company.name }}{% endblock %}
 
 {% block body %}
 {{ include('_header.html.twig') }}
 
 <main class="page">
     <div class="container">
-        <p class="eyebrow">Étape 1 sur 3</p>
-        <h1 class="page-title">Choisissez une prestation</h1>
-        <p class="page-lede">L'agenda n'affichera que les créneaux où elle tient en entier.</p>
+        {% if company.activeCalendars|length > 1 %}
+            <a class="back-link" href="{{ path('app_company', {company: company.slug}) }}">← {{ company.name }}</a>
+        {% endif %}
+
+        <p class="eyebrow">{{ company.name }} · Étape 1 sur 3</p>
+        <h1 class="page-title">{{ calendar.name }}</h1>
+        <p class="page-lede">{{ calendar.description ?? 'Choisissez une prestation : l\'agenda n\'affichera que les créneaux où elle tient en entier.' }}</p>
 
         {% if services is empty %}
-            <p class="empty">Aucune prestation n'est proposée pour le moment.</p>
+            <p class="empty">Aucune prestation n'est proposée sur cet agenda pour le moment.</p>
         {% else %}
             <ul class="services">
                 {% for service in services %}
                     <li>
-                        <a class="service-card" href="{{ path('app_booking_agenda', {id: service.id}) }}">
+                        <a class="service-card" href="{{ path('app_booking_agenda', {company: company.slug, calendar: calendar.slug, service: service.id}) }}">
                             <span class="service-head">
                                 <span class="service-name">{{ service.name }}</span>
                                 <span class="service-price">{{ service.priceCents|price }}</span>

@@ -1,15 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ service.name }} · Kairos{% endblock %}
+{% block title %}{{ service.name }} · {{ company.name }}{% endblock %}
+
+{# Paramètres communs des liens de cette page #}
+{% set route = {company: company.slug, calendar: calendar.slug, service: service.id} %}
 
 {% block body %}
 {{ include('_header.html.twig') }}
 
 <main class="page">
     <div class="container">
-        <a class="back-link" href="{{ path('app_booking_services') }}">← Changer de prestation</a>
+        <a class="back-link" href="{{ path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">← Changer de prestation</a>
 
-        <p class="eyebrow">Étape 2 sur 3</p>
+        <p class="eyebrow">{{ company.name }} · {{ calendar.name }} · Étape 2 sur 3</p>
         <h1 class="page-title">{{ service.name }}</h1>
         <p class="page-lede">{{ service.durationMinutes|duration }} · {{ service.priceCents|price }} — choisissez un créneau libre.</p>
 
@@ -18,7 +21,7 @@
         <section class="planner" aria-labelledby="planner-week">
             <div class="planner-head">
                 {% if previous_week %}
-                    <a class="planner-nav" href="{{ path('app_booking_agenda', {id: service.id, semaine: previous_week|date('Y-m-d')}) }}" aria-label="Semaine précédente">‹</a>
+                    <a class="planner-nav" href="{{ path('app_booking_agenda', route|merge({semaine: previous_week|date('Y-m-d')})) }}" aria-label="Semaine précédente">‹</a>
                 {% else %}
                     <span class="planner-nav is-disabled" aria-hidden="true">‹</span>
                 {% endif %}
@@ -28,7 +31,7 @@
                 </h2>
 
                 {% if next_week %}
-                    <a class="planner-nav" href="{{ path('app_booking_agenda', {id: service.id, semaine: next_week|date('Y-m-d')}) }}" aria-label="Semaine suivante">›</a>
+                    <a class="planner-nav" href="{{ path('app_booking_agenda', route|merge({semaine: next_week|date('Y-m-d')})) }}" aria-label="Semaine suivante">›</a>
                 {% else %}
                     <span class="planner-nav is-disabled" aria-hidden="true">›</span>
                 {% endif %}
@@ -50,7 +53,7 @@
                                     <li>
                                         {% if slot.free %}
                                             <a class="slot slot-free"
-                                               href="{{ path('app_booking_new', {id: service.id, debut: slot.start|date('Y-m-d\\TH:i')}) }}"
+                                               href="{{ path('app_booking_new', route|merge({debut: slot.start|date('Y-m-d\\TH:i')})) }}"
                                                title="Réserver de {{ slot.start|date('H:i') }} à {{ slot.end|date('H:i') }}">{{ slot.start|date('H:i') }}</a>
                                         {% else %}
                                             <span class="slot slot-{{ slot.status.value }}">{{ slot.start|date('H:i') }}</span>

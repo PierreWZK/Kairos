@@ -8,7 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Une prestation proposée à la réservation (ex. « Séance individuelle, 1 h, 60 € »).
+ * Une prestation du catalogue d'une entreprise (ex. « Coupe femme, 45 min, 42 € »).
+ * Chaque calendrier de l'entreprise coche celles qu'il propose.
  */
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 class Service
@@ -17,6 +18,11 @@ class Service
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\ManyToOne(inversedBy: 'services')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull]
+    private ?Company $company = null;
 
     #[ORM\Column(length: 120)]
     #[Assert\NotBlank]
@@ -48,6 +54,18 @@ class Service
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?Company $company): static
+    {
+        $this->company = $company;
+
+        return $this;
     }
 
     public function getName(): string

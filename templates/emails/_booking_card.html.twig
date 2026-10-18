@@ -1,12 +1,13 @@
-{# Encadré récapitulatif d'un rendez-vous : variable attendue « booking » #}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0; background:{{ booking.cancelled ? '#ece6da' : '#0f5c56' }}; border-radius:12px;">
+{# Encadré récapitulatif d'un rendez-vous : variable attendue « booking ». Grisé s'il ne tient plus (annulé, refusé) #}
+{% set inactive = not booking.status.blocksSlot %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0; background:{{ inactive ? '#ece6da' : '#0f5c56' }}; border-radius:12px;">
     <tr>
-        <td style="padding:20px 24px; color:{{ booking.cancelled ? '#5d6b69' : '#f6f1e7' }};">
-            <div style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">{{ booking.service.name }}</div>
-            <div style="margin-top:8px; font-family:Georgia, serif; font-size:20px; font-weight:bold;{{ booking.cancelled ? ' text-decoration:line-through;' }}">
+        <td style="padding:20px 24px; color:{{ inactive ? '#5d6b69' : '#f6f1e7' }};">
+            <div style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">{{ booking.service.name }} · {{ booking.calendar.name }}</div>
+            <div style="margin-top:8px; font-family:Georgia, serif; font-size:20px; font-weight:bold;{{ inactive ? ' text-decoration:line-through;' }}">
                 {{ booking.startsAt|format_date(pattern: 'EEEE d MMMM y')|capitalize }}
             </div>
-            <div style="font-size:16px;{{ booking.cancelled ? ' text-decoration:line-through;' }}">{{ booking.startsAt|date('H:i') }} → {{ booking.endsAt|date('H:i') }}</div>
+            <div style="font-size:16px;{{ inactive ? ' text-decoration:line-through;' }}">{{ booking.startsAt|date('H:i') }} → {{ booking.endsAt|date('H:i') }}</div>
             <div style="margin-top:12px; font-size:13px;">{{ booking.service.durationMinutes|duration }} · {{ booking.service.priceCents|price }}</div>
         </td>
     </tr>

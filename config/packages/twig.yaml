@@ -1,5 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
+    # Fuseau d'affichage par défaut (super-admin) ; les pages d'une entreprise basculent dans le sien (Twig\DisplayTimezone)
+    date:
+        timezone: 'Europe/Paris'
 
 when@test:
     twig:

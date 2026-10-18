@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\TimeOff;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -30,6 +31,7 @@ final class TimeOffCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        yield AssociationField::new('calendar', 'Calendrier');
         yield DateTimeField::new('startsAt', 'Début')->setFormat('EEE d MMM y, HH:mm');
         yield DateTimeField::new('endsAt', 'Fin')
             ->setFormat('EEE d MMM y, HH:mm')

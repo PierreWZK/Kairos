@@ -28,8 +28,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**
- * Les rendez-vous ne se créent que côté client et ne se suppriment jamais (on garde l'historique) :
- * le professionnel consulte, corrige les coordonnées et annule.
+ * Toutes les réservations de la plateforme (super-admin). Elles ne se créent que côté client et ne se suppriment
+ * jamais (on garde l'historique) : on consulte, on corrige les coordonnées, on annule.
  *
  * @extends AbstractCrudController<Booking>
  */
@@ -68,6 +68,8 @@ final class BookingCrudController extends AbstractCrudController
         yield FormField::addFieldset('Rendez-vous')->hideOnForm();
         yield DateTimeField::new('startsAt', 'Début')->setFormat('EEE d MMM y, HH:mm')->hideOnForm();
         yield DateTimeField::new('endsAt', 'Fin')->setFormat('HH:mm')->onlyOnDetail();
+        yield AssociationField::new('calendar', 'Calendrier')->hideOnForm();
+        yield TextField::new('company', 'Entreprise')->hideOnForm()->hideOnIndex();
         yield AssociationField::new('service', 'Prestation')->hideOnForm();
         // Choix déduits de l'enum (mapping Doctrine) ; libellés fournis par BookingStatus::trans()
         yield ChoiceField::new('status', 'Statut')
@@ -109,6 +111,7 @@ final class BookingCrudController extends AbstractCrudController
     {
         return $filters
             ->add(DateTimeFilter::new('startsAt', 'Date'))
+            ->add(EntityFilter::new('calendar', 'Calendrier'))
             ->add(EntityFilter::new('service', 'Prestation'))
             ->add(ChoiceFilter::new('status', 'Statut')->setChoices(self::STATUS_FILTER_CHOICES));
     }
@@ -116,16 +119,16 @@ final class BookingCrudController extends AbstractCrudController
     #[AdminRoute('/{id}/cancel', name: 'cancelBooking', options: ['methods' => ['POST']])]
     public function cancelBooking(Booking $booking, Request $request, EntityManagerInterface $entityManager, BookingMailer $mailer): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
         if (!$this->isCsrfTokenValid('admin-cancel'.$booking->getId(), $request->query->getString('token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        // Le professionnel peut annuler à tout moment, sans le délai imposé aux clients
+        // Le super-admin peut annuler à tout moment, sans le délai imposé aux clients
         if (!$booking->isCancelled()) {
             $booking->cancel();
             $entityManager->flush();
-            $mailer->sendCancellation($booking, byOwner: true);
+            $mailer->sendCancellation($booking, byCompany: true);
             $this->addFlash('success', sprintf('Le rendez-vous de %s est annulé et le client a été prévenu par e-mail.', $booking->getCustomerName()));
         }
 

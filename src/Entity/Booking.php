@@ -9,19 +9,26 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Un rendez-vous pris par un client.
+ * Un rendez-vous pris par un client sur un calendrier.
  *
+ * Les dates sont stockées en UTC (voir Kernel) ; l'affichage se fait dans le fuseau de l'entreprise.
  * La fin (endsAt) est enregistrée au moment de la réservation : si la durée de la prestation change
  * plus tard, les rendez-vous déjà pris ne bougent pas.
  */
 #[ORM\Entity(repositoryClass: BookingRepository::class)]
-#[ORM\Index(name: 'idx_booking_period', columns: ['starts_at', 'ends_at'])]
+#[ORM\Index(name: 'idx_booking_calendar_period', columns: ['calendar_id', 'starts_at', 'ends_at'])]
 class Booking
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    // RESTRICT : un calendrier qui a des rendez-vous ne se supprime pas (on le désactive)
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[Assert\NotNull]
+    private ?Calendar $calendar = null;
 
     // RESTRICT : on ne peut pas supprimer une prestation qui a des rendez-vous (on la désactive)
     #[ORM\ManyToOne]
@@ -76,7 +83,7 @@ class Booking
 
     public function __toString(): string
     {
-        return sprintf('%s · %s', $this->customerName, $this->startsAt?->format('d/m/Y H:i'));
+        return sprintf('%s · %s', $this->customerName, $this->getLocalStartsAt()?->format('d/m/Y H:i'));
     }
 
     public function cancel(): void
@@ -92,6 +99,35 @@ class Booking
     public function isCancelled(): bool
     {
         return BookingStatus::Cancelled === $this->status;
+    }
+
+    /** Validation manuelle : la demande attend la réponse de l'entreprise */
+    public function markPending(): void
+    {
+        $this->status = BookingStatus::Pending;
+    }
+
+    public function getCalendar(): ?Calendar
+    {
+        return $this->calendar;
+    }
+
+    public function setCalendar(?Calendar $calendar): static
+    {
+        $this->calendar = $calendar;
+
+        return $this;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->calendar?->getCompany();
+    }
+
+    /** Début dans le fuseau de l'entreprise */
+    public function getLocalStartsAt(): ?\DateTimeImmutable
+    {
+        return $this->startsAt?->setTimezone($this->calendar?->getDateTimeZone() ?? new \DateTimeZone('UTC'));
     }
 
     public function getId(): ?int
@@ -119,7 +155,8 @@ class Booking
 
     public function setStartsAt(?\DateTimeImmutable $startsAt): static
     {
-        $this->startsAt = $startsAt;
+        // Toujours en UTC : Doctrine enregistre l'heure telle quelle, sans conversion de fuseau
+        $this->startsAt = $startsAt?->setTimezone(new \DateTimeZone('UTC'));
         $this->refreshEndsAt();
 
         return $this;

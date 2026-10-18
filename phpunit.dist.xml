@@ -14,7 +14,7 @@
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
         <!-- Comme Kernel::boot(), pour les tests unitaires qui ne démarrent pas le kernel -->
-        <ini name="date.timezone" value="Europe/Paris" />
+        <ini name="date.timezone" value="UTC" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
     </php>

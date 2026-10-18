@@ -1,31 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vos coordonnées · Kairos{% endblock %}
+{% block title %}Vos coordonnées · {{ company.name }}{% endblock %}
 
 {% block body %}
 {{ include('_header.html.twig') }}
 
 <main class="page">
     <div class="container">
-        <a class="back-link" href="{{ path('app_booking_agenda', {id: service.id, semaine: booking.startsAt|date('Y-m-d')}) }}">← Choisir un autre créneau</a>
+        <a class="back-link" href="{{ path('app_booking_agenda', {company: company.slug, calendar: calendar.slug, service: service.id, semaine: booking.startsAt|date('Y-m-d')}) }}">← Choisir un autre créneau</a>
 
-        <p class="eyebrow">Étape 3 sur 3</p>
+        <p class="eyebrow">{{ company.name }} · {{ calendar.name }} · Étape 3 sur 3</p>
         <h1 class="page-title">Vos coordonnées</h1>
-        <p class="page-lede">Pas de compte à créer : un nom et un e-mail suffisent.</p>
+        <p class="page-lede">
+            Pas de compte à créer : un nom et un e-mail suffisent.
+            {% if calendar.requiresApproval %}Votre demande sera ensuite validée par {{ company.name }}.{% endif %}
+        </p>
 
         <div class="checkout">
             {{ include('booking/_summary.html.twig') }}
 
             {{ form_start(form, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+                {% if calendar.formMessage %}
+                    <p class="form-message">{{ calendar.formMessage|nl2br }}</p>
+                {% endif %}
                 {# Erreurs qui ne concernent aucun champ en particulier (jeton CSRF, par exemple) #}
                 {% if form.vars.errors|length %}
                     <div class="flash flash-warning">{{ form_errors(form) }}</div>
                 {% endif %}
                 {{ form_row(form.customerName) }}
                 {{ form_row(form.customerEmail) }}
-                {{ form_row(form.customerPhone, {label: 'Téléphone <span class="optional">facultatif</span>', label_html: true}) }}
-                {{ form_row(form.note, {label: 'Un mot pour préparer le rendez-vous <span class="optional">facultatif</span>', label_html: true}) }}
-                <button type="submit" class="button button-primary">Confirmer le rendez-vous</button>
+                {% if calendar.phoneRequired %}
+                    {{ form_row(form.customerPhone) }}
+                {% else %}
+                    {{ form_row(form.customerPhone, {label: 'Téléphone <span class="optional">facultatif</span>', label_html: true}) }}
+                {% endif %}
+                {% if form.note is defined %}
+                    {{ form_row(form.note, {label: 'Un mot pour préparer le rendez-vous <span class="optional">facultatif</span>', label_html: true}) }}
+                {% endif %}
+                <button type="submit" class="button button-primary">{{ calendar.requiresApproval ? 'Envoyer ma demande' : 'Confirmer le rendez-vous' }}</button>
             {{ form_end(form) }}
         </div>
     </div>

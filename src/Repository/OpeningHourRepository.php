@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Calendar;
 use App\Entity\OpeningHour;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,10 +17,12 @@ class OpeningHourRepository extends ServiceEntityRepository
         parent::__construct($registry, OpeningHour::class);
     }
 
-    /** @return array<int, list<OpeningHour>> Les plages d'ouverture par jour ISO (1 = lundi), triées par heure */
-    public function findAllByDay(): array
+    /** @return array<int, list<OpeningHour>> Les plages d'ouverture du calendrier par jour ISO (1 = lundi), triées par heure */
+    public function findAllByDay(Calendar $calendar): array
     {
         $hours = $this->createQueryBuilder('h')
+            ->andWhere('h.calendar = :calendar')
+            ->setParameter('calendar', $calendar)
             ->orderBy('h.dayOfWeek', 'ASC')
             ->addOrderBy('h.startTime', 'ASC')
             ->getQuery()

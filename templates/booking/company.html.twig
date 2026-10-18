@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ company.name }} · Réservation en ligne{% endblock %}
+{% block description %}Réservez un rendez-vous avec {{ company.name }} en ligne.{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        <p class="eyebrow">Réservation en ligne</p>
+        <h1 class="page-title">{{ company.name }}</h1>
+        {% if company.description %}
+            <p class="page-lede">{{ company.description }}</p>
+        {% endif %}
+        {% if company.address %}
+            <p class="page-meta">{{ company.address }}</p>
+        {% endif %}
+
+        {% if calendars is empty %}
+            <p class="empty">Aucun agenda n'est ouvert à la réservation pour le moment.</p>
+        {% else %}
+            <h2 class="section-title">Avec qui souhaitez-vous prendre rendez-vous ?</h2>
+            <ul class="services">
+                {% for calendar in calendars %}
+                    <li>
+                        <a class="service-card" href="{{ path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">
+                            <span class="service-name">{{ calendar.name }}</span>
+                            {% if calendar.description %}
+                                <span class="service-description">{{ calendar.description }}</span>
+                            {% endif %}
+                            <span class="service-duration">{{ calendar.offeredServices|length }} prestation{{ calendar.offeredServices|length > 1 ? 's' }}</span>
+                            <span class="service-cta">Voir les disponibilités →</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}

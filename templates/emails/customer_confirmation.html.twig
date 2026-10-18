@@ -1,13 +1,20 @@
 {% extends 'emails/_layout.html.twig' %}
 
 {% block content %}
+    {% set pending = booking.status.value == 'pending' %}
     <p style="margin:0;">Bonjour {{ booking.customerName }},</p>
-    <p>Votre rendez-vous est confirmé :</p>
+    {% if pending %}
+        <p>Votre demande de rendez-vous auprès de <strong>{{ company.name }}</strong> est bien reçue. Elle doit encore être validée : vous recevrez un e-mail dès qu'elle sera acceptée ou refusée.</p>
+    {% else %}
+        <p>Votre rendez-vous auprès de <strong>{{ company.name }}</strong> est confirmé :</p>
+    {% endif %}
 
     {{ include('emails/_booking_card.html.twig') }}
 
-    <p>Le fichier <strong>rendez-vous.ics</strong> joint à cet e-mail l'ajoute à votre agenda.</p>
-    <p>Un empêchement ? Vous pouvez annuler en ligne jusqu'à {{ cancel_notice_hours }} h avant le rendez-vous, depuis cette page :</p>
+    {% if not pending %}
+        <p>Le fichier <strong>rendez-vous.ics</strong> joint à cet e-mail l'ajoute à votre agenda.</p>
+    {% endif %}
+    <p>Un empêchement ? Vous pouvez annuler en ligne jusqu'à {{ booking.calendar.cancelNoticeHours }} h avant le rendez-vous, depuis cette page :</p>
     <p style="margin:24px 0;">
         <a href="{{ manage_url }}" style="display:inline-block; padding:12px 20px; background:#0f5c56; border-radius:999px; color:#f6f1e7; font-weight:bold; text-decoration:none;">Voir ou annuler mon rendez-vous</a>
     </p>

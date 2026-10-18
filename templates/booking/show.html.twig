@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Votre rendez-vous · Kairos{% endblock %}
+{% block title %}Votre rendez-vous · {{ company.name }}{% endblock %}
 
 {# Page privée : son adresse contient le jeton d'annulation, elle ne doit ni être indexée ni fuiter par le Referer #}
 {% block meta %}
@@ -15,14 +15,23 @@
     <div class="container">
         {{ include('_flashes.html.twig') }}
 
-        {% if booking.cancelled %}
+        {% set status = booking.status.value %}
+        {% if status == 'cancelled' %}
             <p class="eyebrow">Rendez-vous annulé</p>
             <h1 class="page-title">Ce rendez-vous a été annulé</h1>
             <p class="page-lede">Annulé le {{ booking.cancelledAt|format_date(pattern: 'd MMMM y') }}. Le créneau est de nouveau proposé aux autres clients.</p>
+        {% elseif status == 'rejected' %}
+            <p class="eyebrow">Demande refusée</p>
+            <h1 class="page-title">{{ company.name }} n'a pas pu accepter cette demande</h1>
+            <p class="page-lede">Vous pouvez choisir un autre créneau.</p>
+        {% elseif status == 'pending' %}
+            <p class="eyebrow">Demande envoyée</p>
+            <h1 class="page-title">Merci, {{ booking.customerName }} !</h1>
+            <p class="page-lede">Votre demande est en attente de validation par {{ company.name }}. Vous recevrez un e-mail à {{ booking.customerEmail }} dès qu'elle sera acceptée ou refusée.</p>
         {% else %}
             <p class="eyebrow">C'est réservé</p>
             <h1 class="page-title">À bientôt, {{ booking.customerName }} !</h1>
-            <p class="page-lede">Votre rendez-vous est confirmé. Un récapitulatif a été envoyé à {{ booking.customerEmail }}, avec un lien vers cette page.</p>
+            <p class="page-lede">Votre rendez-vous avec {{ company.name }} est confirmé. Un récapitulatif a été envoyé à {{ booking.customerEmail }}, avec un lien vers cette page.</p>
         {% endif %}
 
         <div class="checkout">
@@ -43,20 +52,20 @@
 
                 {% if can_cancel %}
                     <details class="cancel-box">
-                        <summary>Annuler ce rendez-vous</summary>
+                        <summary>{{ status == 'pending' ? 'Retirer ma demande' : 'Annuler ce rendez-vous' }}</summary>
                         <p>Le créneau sera libéré pour d'autres clients. Cette action est définitive.</p>
                         <form method="post" action="{{ path('app_booking_cancel', {token: booking.cancelToken}) }}">
                             <input type="hidden" name="_token" value="{{ csrf_token('cancel-booking') }}">
                             <button type="submit" class="button button-danger">Oui, annuler le rendez-vous</button>
                         </form>
                     </details>
-                {% elseif not booking.cancelled and not is_past %}
-                    <p class="details-note">Le rendez-vous commence dans moins de {{ cancel_notice_hours }} h : il ne peut plus être annulé en ligne.</p>
-                {% elseif is_past and not booking.cancelled %}
+                {% elseif booking.status.blocksSlot and not is_past %}
+                    <p class="details-note">Le rendez-vous commence dans moins de {{ calendar.cancelNoticeHours }} h : il ne peut plus être annulé en ligne.</p>
+                {% elseif booking.status.blocksSlot and is_past %}
                     <p class="details-note">Ce rendez-vous est passé.</p>
                 {% endif %}
 
-                <a class="button button-ghost" href="{{ path('app_booking_services') }}">Réserver {{ booking.cancelled ? 'un nouveau' : 'un autre' }} créneau</a>
+                <a class="button button-ghost" href="{{ path('app_calendar', {company: company.slug, calendar: calendar.slug}) }}">Réserver {{ booking.status.blocksSlot ? 'un autre' : 'un nouveau' }} créneau</a>
             </div>
         </div>
     </div>

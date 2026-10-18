@@ -13,7 +13,7 @@ final class CalendarInviteTest extends TestCase
     {
         $service = (new Service())->setName('Séance, version 1; test')->setDurationMinutes(60);
         // 22 octobre 2026 : heure d'été, Paris = UTC+2
-        $booking = (new Booking())->setService($service)->setStartsAt(new \DateTimeImmutable('2026-10-22 10:00'));
+        $booking = (new Booking())->setService($service)->setStartsAt(new \DateTimeImmutable('2026-10-22 10:00', new \DateTimeZone('Europe/Paris')));
 
         $ics = CalendarInvite::forBooking($booking, 'https://kairos.test/rendez-vous/abc');
 

@@ -31,7 +31,8 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        # EasyAdmin : réservé au super-admin de la plateforme
+        - { path: ^/admin, roles: ROLE_SUPER_ADMIN }
 
 when@test:
     security:
