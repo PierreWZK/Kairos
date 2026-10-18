@@ -7,6 +7,9 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^3.3",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.7",
         "symfony/asset-mapper": "8.1.*",
         "symfony/console": "8.1.*",
         "symfony/dotenv": "8.1.*",
@@ -68,10 +71,12 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "8.1.*"
+            "require": "8.1.*",
+            "docker": "false"
         }
     },
     "require-dev": {
+        "symfony/maker-bundle": "^1.68",
         "symfony/web-profiler-bundle": "8.1.*"
     }
 }
