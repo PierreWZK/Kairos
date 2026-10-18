@@ -1,0 +1,25 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Invitation · {{ user.company.name }}{% endblock %}
+
+{# L'adresse contient le lien signé : il ne doit pas fuiter vers d'autres sites #}
+{% block meta %}
+    {{ parent() }}
+    <meta name="referrer" content="same-origin">
+{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Invitation</p>
+<h1 class="page-title">Rejoignez {{ user.company.name }}</h1>
+<p class="page-lede">Choisissez votre mot de passe pour {{ user.email }}. Vous vous connecterez ensuite avec cette adresse.</p>
+
+{{ form_start(form, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+    {% if form.vars.errors|length %}
+        <div class="flash flash-warning">{{ form_errors(form) }}</div>
+    {% endif %}
+    {{ form_row(form.name) }}
+    {{ form_row(form.plainPassword.first) }}
+    {{ form_row(form.plainPassword.second) }}
+    <button type="submit" class="button button-primary">Rejoindre l'équipe</button>
+{{ form_end(form) }}
+{% endblock %}

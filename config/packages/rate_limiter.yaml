@@ -11,4 +11,8 @@ framework:
             policy: sliding_window
             limit: 3
             interval: '15 minutes'
-
+        # Invitations dans une équipe (envois et renvois) : 20 par heure et par entreprise
+        team_invitation:
+            policy: sliding_window
+            limit: 20
+            interval: '1 hour'

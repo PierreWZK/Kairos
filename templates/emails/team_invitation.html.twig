@@ -1,0 +1,10 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <p style="margin:0;">Bonjour {{ user.name }},</p>
+    <p>{{ invited_by.name }} vous invite à rejoindre l'équipe de <strong>{{ user.company.name }}</strong> sur Kairos, pour gérer {{ user.owner ? 'l\'entreprise' : 'vos rendez-vous' }}.</p>
+    <p style="margin:24px 0;">
+        <a href="{{ url }}" style="display:inline-block; padding:12px 20px; background:#0f5c56; border-radius:999px; color:#f6f1e7; font-weight:bold; text-decoration:none;">Choisir mon mot de passe</a>
+    </p>
+    <p style="color:#5d6b69; font-size:13px;">Ce lien est valable 7 jours. Si vous ne vous attendiez pas à cette invitation, ignorez cet e-mail.</p>
+{% endblock %}

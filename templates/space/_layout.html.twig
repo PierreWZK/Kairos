@@ -24,8 +24,7 @@
             <a href="{{ path('app_space_calendars') }}"{% if current_route starts with 'app_space_calendar' %} aria-current="page"{% endif %}>Calendriers</a>
             {% if is_granted('ROLE_COMPANY_OWNER') %}
                 <a href="{{ path('app_space_services') }}"{% if current_route starts with 'app_space_service' %} aria-current="page"{% endif %}>Prestations</a>
-            {% endif %}
-            {% if is_granted('ROLE_COMPANY_OWNER') %}
+                <a href="{{ path('app_space_team') }}"{% if current_route starts with 'app_space_team' %} aria-current="page"{% endif %}>Équipe</a>
                 <a href="{{ path('app_space_company') }}"{% if current_route == 'app_space_company' %} aria-current="page"{% endif %}>Entreprise</a>
             {% endif %}
             <a href="{{ path('app_space_account') }}"{% if current_route == 'app_space_account' %} aria-current="page"{% endif %}>Mon compte</a>

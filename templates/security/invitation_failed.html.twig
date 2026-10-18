@@ -1,0 +1,13 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Invitation expirée · Kairos{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Invitation</p>
+<h1 class="page-title">Ce lien ne fonctionne plus</h1>
+<p class="page-lede">Il a expiré (il est valable 7 jours), il a déjà servi, ou il est incomplet. Demandez à la personne qui vous a invité de vous renvoyer l'invitation.</p>
+
+<div class="hero-actions">
+    <a class="button button-ghost" href="{{ path('app_login') }}">J'ai déjà choisi mon mot de passe</a>
+</div>
+{% endblock %}

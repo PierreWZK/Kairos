@@ -116,14 +116,14 @@ final class BookingMailer
             ->context(['booking' => $booking, 'company' => $booking->getCompany()]), $booking);
     }
 
-    /** @return list<User> Les propriétaires de l'entreprise et les membres qui gèrent ce calendrier */
+    /** @return list<User> Les propriétaires de l'entreprise et les membres qui gèrent ce calendrier (invitations acceptées) */
     private function companyRecipients(Booking $booking): array
     {
         $calendar = $booking->getCalendar();
 
         return array_values(array_filter(
             $booking->getCompany()->getUsers()->toArray(),
-            static fn (User $user): bool => $user->manages($calendar),
+            static fn (User $user): bool => !$user->isInvitationPending() && $user->manages($calendar),
         ));
     }
 

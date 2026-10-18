@@ -1649,6 +1649,16 @@ a.slot-free:focus-visible {
     margin: 0;
 }
 
+.space-head + .row-list {
+    margin-top: 1.5rem;
+}
+
+.row-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
 .row-list .badge {
     margin-left: 0.4rem;
 }
@@ -1685,7 +1695,9 @@ a.slot-free:focus-visible {
     margin-top: 1.5rem;
 }
 
-.booking-form input[type='checkbox'] {
+.booking-form input[type='checkbox'],
+.booking-form input[type='radio'] {
+    flex-shrink: 0;
     width: auto;
     margin: 0.25rem 0 0;
     accent-color: var(--primary);

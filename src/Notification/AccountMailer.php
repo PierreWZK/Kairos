@@ -11,7 +11,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
 /**
- * Les e-mails d'un compte : vérification de l'adresse, nouveau mot de passe.
+ * Les e-mails d'un compte : vérification de l'adresse, nouveau mot de passe, invitation dans une équipe.
  *
  * Un échec d'envoi est journalisé sans interrompre la page : l'utilisateur peut redemander le lien.
  */
@@ -34,13 +34,26 @@ final class AccountMailer
         $this->send($user, 'Choisissez un nouveau mot de passe', 'emails/account_reset.html.twig', $this->links->resetUrl($user));
     }
 
-    private function send(User $user, string $subject, string $template, string $url): void
+    /** Invitation dans l'équipe de l'entreprise, envoyée par $invitedBy */
+    public function sendInvitation(User $user, User $invitedBy): void
+    {
+        $this->send(
+            $user,
+            sprintf('%s vous invite sur Kairos', $invitedBy->getName()),
+            'emails/team_invitation.html.twig',
+            $this->links->invitationUrl($user),
+            ['invited_by' => $invitedBy],
+        );
+    }
+
+    /** @param array<string, mixed> $context */
+    private function send(User $user, string $subject, string $template, string $url, array $context = []): void
     {
         $email = (new TemplatedEmail())
             ->to(new Address($user->getEmail(), $user->getName()))
             ->subject($subject)
             ->htmlTemplate($template)
-            ->context(['user' => $user, 'url' => $url]);
+            ->context(['user' => $user, 'url' => $url, ...$context]);
 
         try {
             $this->mailer->send($email);

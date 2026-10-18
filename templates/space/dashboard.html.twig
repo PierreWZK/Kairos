@@ -34,7 +34,7 @@
     <section class="space-card">
         <h2>Calendriers</h2>
         {% if calendars is empty %}
-            <p>Aucun calendrier pour le moment.</p>
+            <p>{{ user.owner ? 'Aucun calendrier pour le moment.' : 'Aucun calendrier ne vous est encore attribué : demandez-le au propriétaire de l\'entreprise.' }}</p>
         {% else %}
             <ul class="space-list">
                 {% for calendar in calendars %}

@@ -13,12 +13,14 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * Rien n'est stocké en base : le lien est signé avec le secret de l'appli (UriSigner) et expire.
  * Il contient une empreinte de ce qu'il protège, ce qui l'invalide dès que cela change :
  * - vérification : l'adresse e-mail (un lien envoyé à une ancienne adresse ne vaut plus) ;
- * - mot de passe : le hachage du mot de passe actuel (le lien ne sert qu'une fois).
+ * - mot de passe : le hachage du mot de passe actuel (le lien ne sert qu'une fois) ;
+ * - invitation : l'adresse et le mot de passe, encore vide (le lien ne sert qu'une fois).
  */
 final class AccountLinks
 {
     public const string VERIFICATION_TTL = 'P2D';
     public const string RESET_TTL = 'PT1H';
+    public const string INVITATION_TTL = 'P7D';
 
     public function __construct(
         private readonly UriSigner $signer,
@@ -34,6 +36,17 @@ final class AccountLinks
     public function resetUrl(User $user): string
     {
         return $this->signed('app_reset_password', $user, $user->getPassword(), self::RESET_TTL);
+    }
+
+    /** Lien d'invitation dans l'équipe : il ne vaut plus une fois le mot de passe choisi, ni si l'adresse change */
+    public function invitationUrl(User $user): string
+    {
+        return $this->signed('app_invitation', $user, $user->getEmail().'|'.$user->getPassword(), self::INVITATION_TTL);
+    }
+
+    public function isValidInvitation(Request $request, User $user): bool
+    {
+        return $user->isInvitationPending() && $this->isValid($request, $user->getEmail().'|'.$user->getPassword());
     }
 
     public function isValidVerification(Request $request, User $user): bool

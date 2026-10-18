@@ -1,0 +1,46 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% block title %}Équipe · {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="space-head">
+    <div>
+        <h1 class="page-title">Équipe</h1>
+        <p class="page-lede">Chaque membre gère les rendez-vous de ses calendriers et reçoit leurs notifications.</p>
+    </div>
+    <a class="button button-primary" href="{{ path('app_space_team_invite') }}">Inviter quelqu'un</a>
+</div>
+
+<ul class="row-list team-list">
+    {% for member in members %}
+        <li>
+            <div>
+                {% if member.id == app.user.id %}
+                    <strong>{{ member.name }}</strong> <span class="badge">Vous</span>
+                {% else %}
+                    <a href="{{ path('app_space_team_edit', {id: member.id}) }}"><strong>{{ member.name }}</strong></a>
+                {% endif %}
+                {% if member.invitationPending %}<span class="badge badge-warning">Invitation envoyée</span>{% endif %}
+                <span class="page-meta">
+                    {{ member.email }} · {{ member.companyRole.label }}
+                    {%- if member.owner %} · tous les calendriers
+                    {%- elseif member.calendars is empty %} · aucun calendrier
+                    {%- else %} · {{ member.calendars|map(c => c.name)|join(', ') }}
+                    {%- endif %}
+                </span>
+            </div>
+            {% if member.id != app.user.id %}
+                <div class="row-actions">
+                    {% if member.invitationPending %}
+                        <form method="post" action="{{ path('app_space_team_resend', {id: member.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('resend-invitation-' ~ member.id) }}">
+                            <button type="submit" class="button button-ghost button-small">Renvoyer</button>
+                        </form>
+                    {% endif %}
+                    <a class="button button-ghost button-small" href="{{ path('app_space_team_edit', {id: member.id}) }}">Modifier</a>
+                </div>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

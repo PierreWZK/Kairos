@@ -1,0 +1,48 @@
+{% extends 'space/_layout.html.twig' %}
+{% form_theme form 'space/_form_theme.html.twig' %}
+
+{% block title %}{{ member ? member.name : 'Inviter quelqu\'un' }} · Équipe{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ path('app_space_team') }}">← Équipe</a>
+{% if member %}
+    <h1 class="page-title">{{ member.name }}</h1>
+    <p class="page-meta">{{ member.email }}{% if member.invitationPending %} · invitation envoyée, pas encore acceptée{% endif %}</p>
+{% else %}
+    <h1 class="page-title">Inviter quelqu'un</h1>
+    <p class="page-lede">La personne reçoit un e-mail pour choisir son mot de passe. Le lien est valable 7 jours.</p>
+{% endif %}
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    {% if form.vars.errors|length %}
+        <div class="flash flash-warning">{{ form_errors(form) }}</div>
+    {% endif %}
+    {% if form.name is defined %}
+        <div class="form-grid">
+            {{ form_row(form.name) }}
+            {{ form_row(form.email) }}
+        </div>
+    {% endif %}
+    <p class="form-group-title">Rôle</p>
+    {{ form_widget(form.companyRole) }}
+    {{ form_errors(form.companyRole) }}
+
+    <p class="form-group-title">Ses calendriers</p>
+    {{ form_widget(form.calendars) }}
+    {{ form_help(form.calendars) }}
+    {{ form_errors(form.calendars) }}
+
+    <button type="submit" class="button button-primary">{{ member ? 'Enregistrer' : 'Envoyer l\'invitation' }}</button>
+{{ form_end(form) }}
+
+{% if member %}
+    <details class="cancel-box danger-zone">
+        <summary>Retirer {{ member.name }} de l'équipe</summary>
+        <p>Son compte est supprimé et il ne pourra plus se connecter. Les rendez-vous de ses calendriers restent.</p>
+        <form method="post" action="{{ path('app_space_team_remove', {id: member.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('remove-member-' ~ member.id) }}">
+            <button type="submit" class="button button-danger">Retirer {{ member.name }}</button>
+        </form>
+    </details>
+{% endif %}
+{% endblock %}

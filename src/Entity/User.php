@@ -141,6 +141,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /** Invité dans l'équipe, sans avoir encore choisi son mot de passe : il ne peut pas se connecter */
+    public function isInvitationPending(): bool
+    {
+        return '' === $this->password;
+    }
+
     public function isVerified(): bool
     {
         return $this->isVerified;
