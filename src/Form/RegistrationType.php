@@ -34,7 +34,7 @@ final class RegistrationType extends AbstractType
             ->add('timezone', TimezoneType::class, [
                 'label' => 'Fuseau horaire',
                 'help' => 'Vos horaires et vos rendez-vous s\'affichent à cette heure.',
-                'preferred_choices' => ['Europe/Paris', 'Europe/Brussels', 'Europe/Zurich', 'America/Montreal', 'Indian/Reunion'],
+                'preferred_choices' => ['Europe/Paris', 'Europe/Brussels', 'Europe/Zurich', 'America/Toronto', 'Indian/Reunion'],
             ])
             ->add('name', TextType::class, [
                 'label' => 'Votre nom',

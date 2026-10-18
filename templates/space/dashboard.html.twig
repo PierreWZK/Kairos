@@ -51,18 +51,24 @@
     </section>
     <section class="space-card">
         <h2>Prochains rendez-vous</h2>
+        {% if pending_count %}
+            <p><a class="badge badge-warning" href="{{ path('app_space_bookings', {statut: 'pending'}) }}">{{ pending_count }} demande{{ pending_count > 1 ? 's' }} à valider</a></p>
+        {% endif %}
         {% if upcoming is empty %}
             <p>Aucun rendez-vous à venir.</p>
         {% else %}
             <ul class="space-list">
                 {% for booking in upcoming %}
                     <li>
-                        <strong>{{ booking.startsAt|format_date(pattern: 'EEE d MMM')|capitalize }} · {{ booking.startsAt|date('H:i') }}</strong>
+                        <a href="{{ path('app_space_booking_show', {id: booking.id}) }}"><strong>{{ booking.startsAt|format_date(pattern: 'EEE d MMM')|capitalize }} · {{ booking.startsAt|date('H:i') }}</strong></a>
                         {{ booking.customerName }} — {{ booking.service.name }}{% if calendars|length > 1 %} ({{ booking.calendar.name }}){% endif %}
                         {% if booking.status.value == 'pending' %}<span class="badge badge-warning">En attente</span>{% endif %}
                     </li>
                 {% endfor %}
             </ul>
+        {% endif %}
+        {% if user.verified and calendars is not empty %}
+            <a class="button button-ghost button-small" href="{{ path('app_space_bookings') }}">Tous les rendez-vous</a>
         {% endif %}
     </section>
 </div>

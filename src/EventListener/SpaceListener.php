@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Controller\Space\AbstractSpaceController;
+use App\Controller\Space\AccountController;
 use App\Controller\Space\DashboardController;
 use App\Entity\User;
 use App\Twig\DisplayTimezone;
@@ -44,7 +45,8 @@ final class SpaceListener
 
         $this->displayTimezone->useCompany($user->getCompany());
 
-        if (!$user->isVerified() && !$controller instanceof DashboardController) {
+        // L'accueil (pour renvoyer le lien) et le compte (pour corriger une adresse mal saisie) restent ouverts
+        if (!$user->isVerified() && !$controller instanceof DashboardController && !$controller instanceof AccountController) {
             $session = $event->getRequest()->getSession();
             if ($session instanceof FlashBagAwareSessionInterface) {
                 $session->getFlashBag()->add('warning', 'Confirmez d\'abord votre adresse e-mail pour configurer votre entreprise.');

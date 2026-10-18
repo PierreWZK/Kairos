@@ -35,13 +35,7 @@ final class CalendarController extends AbstractSpaceController
     #[Route('', name: 'app_space_calendars', methods: ['GET'])]
     public function index(): Response
     {
-        $user = $this->user();
-        $calendars = array_values(array_filter(
-            $this->company()->getCalendars()->toArray(),
-            static fn (Calendar $calendar): bool => $user->manages($calendar),
-        ));
-
-        return $this->render('space/calendars/index.html.twig', ['calendars' => $calendars]);
+        return $this->render('space/calendars/index.html.twig', ['calendars' => $this->managedCalendars()]);
     }
 
     #[Route('/nouveau', name: 'app_space_calendar_new', methods: ['GET', 'POST'])]

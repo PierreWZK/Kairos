@@ -1,0 +1,66 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = app.user.company %}
+
+{% block title %}Rendez-vous · {{ company.name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Rendez-vous</h1>
+
+<form method="get" class="filters" aria-label="Filtrer les rendez-vous">
+    <label>
+        <span>Période</span>
+        <select name="periode">
+            <option value="a-venir"{{ filters.periode == 'a-venir' ? ' selected' }}>À venir</option>
+            <option value="passes"{{ filters.periode == 'passes' ? ' selected' }}>Passés</option>
+        </select>
+    </label>
+    <label>
+        <span>Statut</span>
+        <select name="statut">
+            <option value="">Tous</option>
+            {% for status in statuses %}
+                <option value="{{ status.value }}"{{ filters.statut == status.value ? ' selected' }}>{{ status.label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    {% if calendars|length > 1 %}
+        <label>
+            <span>Calendrier</span>
+            <select name="calendrier">
+                <option value="">Tous</option>
+                {% for calendar in calendars %}
+                    <option value="{{ calendar.id }}"{{ filters.calendrier == calendar.id ? ' selected' }}>{{ calendar.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    {% endif %}
+    <button type="submit" class="button button-ghost button-small">Filtrer</button>
+</form>
+
+{% if bookings is empty %}
+    <p class="empty">Aucun rendez-vous {{ filters.periode == 'passes' ? 'passé' : 'à venir' }}{{ filters.statut or filters.calendrier ? ' avec ces filtres' }}.</p>
+{% else %}
+    <ul class="row-list booking-list">
+        {% for booking in bookings %}
+            {% set day = booking.startsAt|date('Y-m-d') %}
+            {% if loop.first or day != bookings[loop.index0 - 1].startsAt|date('Y-m-d') %}
+                <li class="row-day">{{ booking.startsAt|format_date(pattern: 'EEEE d MMMM y')|capitalize }}</li>
+            {% endif %}
+            <li>
+                <a class="booking-row" href="{{ path('app_space_booking_show', {id: booking.id}) }}">
+                    <span class="booking-time">{{ booking.startsAt|date('H:i') }}<small>{{ booking.endsAt|date('H:i') }}</small></span>
+                    <span>
+                        <strong>{{ booking.customerName }}</strong>
+                        <span class="page-meta">{{ booking.service.name }}{% if calendars|length > 1 %} · {{ booking.calendar.name }}{% endif %}</span>
+                    </span>
+                </a>
+                {{ include('space/bookings/_status.html.twig') }}
+            </li>
+        {% endfor %}
+    </ul>
+    {% if bookings|length >= limit %}
+        <p class="help-text">Les {{ limit }} premiers rendez-vous sont affichés : affinez les filtres pour voir les autres.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

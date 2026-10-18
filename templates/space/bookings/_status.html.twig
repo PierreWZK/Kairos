@@ -1,0 +1,3 @@
+{# Statut d'un rendez-vous (variable « booking ») #}
+{% set badge = {pending: 'badge-warning', confirmed: 'badge-success', rejected: '', cancelled: ''} %}
+<span class="badge {{ badge[booking.status.value] }}">{{ booking.status.label }}</span>

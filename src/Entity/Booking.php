@@ -107,6 +107,34 @@ class Booking
         $this->status = BookingStatus::Pending;
     }
 
+    public function isPending(): bool
+    {
+        return BookingStatus::Pending === $this->status;
+    }
+
+    /** L'entreprise accepte la demande. @return bool false si ce n'était pas une demande en attente */
+    public function accept(): bool
+    {
+        if (!$this->isPending()) {
+            return false;
+        }
+        $this->status = BookingStatus::Confirmed;
+
+        return true;
+    }
+
+    /** L'entreprise refuse la demande : le créneau est libéré. @return bool false si ce n'était pas une demande en attente */
+    public function reject(): bool
+    {
+        if (!$this->isPending()) {
+            return false;
+        }
+        $this->status = BookingStatus::Rejected;
+        $this->cancelledAt = new \DateTimeImmutable();
+
+        return true;
+    }
+
     public function getCalendar(): ?Calendar
     {
         return $this->calendar;

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Space;
 
-use App\Entity\Calendar;
 use App\Repository\BookingRepository;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,18 +23,14 @@ final class DashboardController extends AbstractSpaceController
             return $this->redirectToRoute('admin');
         }
 
-        $user = $this->user();
-        $company = $this->company();
-        $calendars = array_values(array_filter(
-            $company->getCalendars()->toArray(),
-            static fn (Calendar $calendar): bool => $user->manages($calendar),
-        ));
+        $calendars = $this->managedCalendars();
 
         return $this->render('space/dashboard.html.twig', [
-            'user' => $user,
-            'company' => $company,
+            'user' => $this->user(),
+            'company' => $this->company(),
             'calendars' => $calendars,
             'upcoming' => $bookings->findUpcomingFor($calendars, $clock->now(), 8),
+            'pending_count' => $bookings->countPendingFor($calendars, $clock->now()),
         ]);
     }
 }

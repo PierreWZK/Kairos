@@ -2,6 +2,7 @@
 
 namespace App\Controller\Space;
 
+use App\Entity\Calendar;
 use App\Entity\Company;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,5 +29,16 @@ abstract class AbstractSpaceController extends AbstractController
     protected function company(): Company
     {
         return $this->user()->getCompany() ?? throw $this->createAccessDeniedException('Ce compte n\'est rattaché à aucune entreprise.');
+    }
+
+    /** @return list<Calendar> Les calendriers que l'utilisateur gère : tous pour le propriétaire, les siens pour un membre */
+    protected function managedCalendars(): array
+    {
+        $user = $this->user();
+
+        return array_values(array_filter(
+            $this->company()->getCalendars()->toArray(),
+            static fn (Calendar $calendar): bool => $user->manages($calendar),
+        ));
     }
 }

@@ -1,0 +1,61 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = booking.company %}
+
+{% block title %}{{ booking.customerName }} · Rendez-vous{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ path('app_space_bookings') }}">← Rendez-vous</a>
+<div class="space-head">
+    <h1 class="page-title">{{ booking.customerName }} {{ include('space/bookings/_status.html.twig') }}</h1>
+</div>
+
+<div class="checkout">
+    {{ include('booking/_summary.html.twig') }}
+
+    <div class="details">
+        <h2 class="details-title">Client</h2>
+        <dl class="details-list">
+            <div><dt>Nom</dt><dd>{{ booking.customerName }}</dd></div>
+            <div><dt>E-mail</dt><dd><a href="mailto:{{ booking.customerEmail }}">{{ booking.customerEmail }}</a></dd></div>
+            {% if booking.customerPhone %}
+                <div><dt>Téléphone</dt><dd><a href="tel:{{ booking.customerPhone }}">{{ booking.customerPhone }}</a></dd></div>
+            {% endif %}
+            {% if booking.note %}
+                <div><dt>Note</dt><dd>{{ booking.note|nl2br }}</dd></div>
+            {% endif %}
+            <div><dt>Réservé le</dt><dd>{{ booking.createdAt|format_datetime(pattern: 'd MMMM y, HH:mm') }}</dd></div>
+            {% if booking.cancelledAt %}
+                <div><dt>{{ booking.status.value == 'rejected' ? 'Refusé le' : 'Annulé le' }}</dt><dd>{{ booking.cancelledAt|format_datetime(pattern: 'd MMMM y, HH:mm') }}</dd></div>
+            {% endif %}
+        </dl>
+
+        {% if is_past %}
+            <p class="details-note">Ce rendez-vous est terminé.</p>
+        {% else %}
+            {% if booking.pending %}
+                <div class="decision">
+                    <p>Ce client attend votre réponse. Il la recevra par e-mail.</p>
+                    <form method="post" action="{{ path('app_space_booking_accept', {id: booking.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('accept-booking-' ~ booking.id) }}">
+                        <button type="submit" class="button button-primary">Accepter</button>
+                    </form>
+                    <form method="post" action="{{ path('app_space_booking_reject', {id: booking.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reject-booking-' ~ booking.id) }}">
+                        <button type="submit" class="button button-ghost">Refuser</button>
+                    </form>
+                </div>
+            {% elseif booking.status.blocksSlot %}
+                <details class="cancel-box">
+                    <summary>Annuler ce rendez-vous</summary>
+                    <p>Le client est prévenu par e-mail et le créneau redevient libre. Cette action est définitive.</p>
+                    <form method="post" action="{{ path('app_space_booking_cancel', {id: booking.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('cancel-booking-' ~ booking.id) }}">
+                        <button type="submit" class="button button-danger">Oui, annuler le rendez-vous</button>
+                    </form>
+                </details>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

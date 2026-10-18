@@ -1,0 +1,30 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% block title %}Mon compte · {{ company.name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Mon compte</h1>
+<p class="page-lede">{{ app.user.companyRole.label }} chez {{ company.name }}.</p>
+
+<div class="space-columns account-columns">
+    <section>
+        <h2 class="section-title">Profil</h2>
+        {{ form_start(profile, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+            {{ form_row(profile.name) }}
+            {{ form_row(profile.email) }}
+            {{ form_row(profile.currentPassword) }}
+            <button type="submit" class="button button-primary">Enregistrer le profil</button>
+        {{ form_end(profile) }}
+    </section>
+
+    <section>
+        <h2 class="section-title">Mot de passe</h2>
+        {{ form_start(password, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+            {{ form_row(password.currentPassword) }}
+            {{ form_row(password.plainPassword.first) }}
+            {{ form_row(password.plainPassword.second) }}
+            <button type="submit" class="button button-primary">Changer le mot de passe</button>
+        {{ form_end(password) }}
+    </section>
+</div>
+{% endblock %}

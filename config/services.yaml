@@ -8,6 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 # Les règles de l'agenda (pas, délais, horizon…) sont propres à chaque calendrier : voir l'entité Calendar
 parameters:
+    # Logos des entreprises, servis par le serveur web à /uploads/logos/…
+    app.logo_dir: '%kernel.project_dir%/public/uploads/logos'
 
 services:
     # default configuration for services in *this* file
@@ -24,6 +26,10 @@ services:
     # please note that last definitions always *replace* previous ones
 
 when@test:
+    parameters:
+        # Les tests n'écrivent pas dans public/
+        app.logo_dir: '%kernel.cache_dir%/uploads/logos'
+
     services:
         # Sans Monolog, le logger par défaut écrit sur la sortie d'erreur : les erreurs attendues
         # des tests (403, 404, CSRF refusé…) iraient polluer la sortie de PHPUnit. Le dossier de cache

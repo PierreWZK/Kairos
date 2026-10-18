@@ -91,6 +91,56 @@ class BookingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Les rendez-vous de l'espace entreprise : à venir (les plus proches d'abord) ou passés (les plus récents d'abord).
+     *
+     * @param list<Calendar> $calendars
+     *
+     * @return list<Booking>
+     */
+    public function findForSpace(array $calendars, \DateTimeImmutable $now, bool $upcoming, ?BookingStatus $status, int $limit): array
+    {
+        if ([] === $calendars) {
+            return [];
+        }
+
+        $query = $this->createQueryBuilder('b')
+            ->addSelect('s', 'c')
+            ->join('b.service', 's')
+            ->join('b.calendar', 'c')
+            ->andWhere('b.calendar IN (:calendars)')
+            ->andWhere($upcoming ? 'b.endsAt > :now' : 'b.endsAt <= :now')
+            ->setParameter('calendars', $calendars)
+            ->setParameter('now', self::utc($now))
+            ->orderBy('b.startsAt', $upcoming ? 'ASC' : 'DESC')
+            ->setMaxResults($limit);
+
+        if (null !== $status) {
+            $query->andWhere('b.status = :status')->setParameter('status', $status);
+        }
+
+        return $query->getQuery()->getResult();
+    }
+
+    /** @param list<Calendar> $calendars Le nombre de demandes à venir qui attendent une réponse */
+    public function countPendingFor(array $calendars, \DateTimeImmutable $now): int
+    {
+        if ([] === $calendars) {
+            return 0;
+        }
+
+        return (int) $this->createQueryBuilder('b')
+            ->select('COUNT(b.id)')
+            ->andWhere('b.calendar IN (:calendars)')
+            ->andWhere('b.status = :pending')
+            ->andWhere('b.endsAt > :now')
+            ->setParameter('calendars', $calendars)
+            ->setParameter('pending', BookingStatus::Pending)
+            ->setParameter('now', self::utc($now))
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /** Doctrine enregistre et compare l'heure telle quelle : les bornes doivent être en UTC, comme la base */
     private static function utc(\DateTimeImmutable $date): \DateTimeImmutable
     {

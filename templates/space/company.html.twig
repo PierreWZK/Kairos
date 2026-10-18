@@ -1,0 +1,45 @@
+{% extends 'space/_layout.html.twig' %}
+{% form_theme form 'space/_form_theme.html.twig' %}
+
+{% block title %}Entreprise · {{ company.name }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Entreprise</h1>
+<p class="page-lede">Ce que vos clients voient sur votre page de réservation.</p>
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    <p class="form-group-title">Présentation</p>
+    {{ form_row(form.name) }}
+    <div>
+        {{ form_label(form.slug) }}
+        {{ form_widget(form.slug) }}
+        <p class="slug-preview">{{ url('app_home') }}<strong>{{ form.slug.vars.value }}</strong></p>
+        {{ form_help(form.slug) }}
+        {{ form_errors(form.slug) }}
+    </div>
+    {{ form_row(form.description) }}
+    {{ form_row(form.address) }}
+
+    <p class="form-group-title">Apparence</p>
+    {{ form_row(form.accentColor) }}
+    <div>
+        {{ form_label(form.logo) }}
+        <div class="logo-field">
+            {{ include('booking/_logo.html.twig') }}
+            {{ form_widget(form.logo) }}
+        </div>
+        {{ form_help(form.logo) }}
+        {{ form_errors(form.logo) }}
+    </div>
+    {% if company.logoFilename %}
+        {{ form_row(form.removeLogo) }}
+    {% else %}
+        {% do form.removeLogo.setRendered %}
+    {% endif %}
+
+    <p class="form-group-title">Fuseau horaire</p>
+    {{ form_row(form.timezone) }}
+
+    <button type="submit" class="button button-primary">Enregistrer</button>
+{{ form_end(form) }}
+{% endblock %}

@@ -1680,6 +1680,11 @@ a.slot-free:focus-visible {
     max-width: 760px;
 }
 
+.page-lede + .space-form,
+.page-meta + .space-form {
+    margin-top: 1.5rem;
+}
+
 .booking-form input[type='checkbox'] {
     width: auto;
     margin: 0.25rem 0 0;
@@ -1783,6 +1788,130 @@ a.slot-free:focus-visible {
 .danger-zone {
     max-width: 760px;
     margin-top: 2.5rem;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin: 1.5rem 0;
+}
+
+.filters label {
+    display: grid;
+    gap: 0.3rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.filters select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.92rem;
+}
+
+.filters button {
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.booking-list .row-day {
+    padding: 0.6rem 1.25rem;
+    background: var(--bg-alt);
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.booking-row {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 1.25rem;
+    color: inherit !important;
+    font-weight: 400 !important;
+}
+
+.booking-row strong {
+    color: var(--ink);
+}
+
+.booking-row:hover strong {
+    color: var(--primary);
+}
+
+.booking-time {
+    display: grid;
+    min-width: 3.5rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.booking-time small {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.decision {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.decision p {
+    flex-basis: 100%;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.decision form {
+    margin: 0;
+}
+
+.decision button {
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.decision .button-primary {
+    border: 0;
+}
+
+.logo-field {
+    display: flex !important;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-field .company-logo,
+.logo-field .monogram {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    font-size: 1.6rem;
+}
+
+.booking-form input[type='color'] {
+    width: 4rem;
+    height: 2.75rem;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.booking-form input[type='file'] {
+    padding: 0.55rem;
 }
 
 /* Responsive */

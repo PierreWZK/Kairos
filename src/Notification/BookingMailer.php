@@ -35,6 +35,25 @@ final class BookingMailer
     public function sendConfirmation(Booking $booking): void
     {
         $pending = BookingStatus::Pending === $booking->getStatus();
+        $this->sendCustomerConfirmation($booking);
+        $this->sendToCompany($booking, $pending ? 'Demande à valider' : 'Nouveau rendez-vous', 'emails/owner_new.html.twig');
+    }
+
+    /** L'entreprise a accepté la demande : le client reçoit la confirmation, avec l'invitation d'agenda */
+    public function sendAccepted(Booking $booking): void
+    {
+        $this->sendCustomerConfirmation($booking);
+    }
+
+    /** L'entreprise a refusé la demande */
+    public function sendRejected(Booking $booking): void
+    {
+        $this->send($this->toCustomer($booking, 'Votre demande de rendez-vous n\'a pas pu être acceptée', 'emails/customer_rejected.html.twig'), $booking);
+    }
+
+    private function sendCustomerConfirmation(Booking $booking): void
+    {
+        $pending = BookingStatus::Pending === $booking->getStatus();
         $email = $this->toCustomer(
             $booking,
             $pending ? 'Votre demande de rendez-vous est bien reçue' : 'Votre rendez-vous est confirmé',
@@ -47,7 +66,6 @@ final class BookingMailer
         }
 
         $this->send($email, $booking);
-        $this->sendToCompany($booking, $pending ? 'Demande à valider' : 'Nouveau rendez-vous', 'emails/owner_new.html.twig');
     }
 
     /**

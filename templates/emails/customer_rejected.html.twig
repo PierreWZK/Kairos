@@ -1,0 +1,14 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <p style="margin:0;">Bonjour {{ booking.customerName }},</p>
+    <p>Nous sommes désolés : <strong>{{ company.name }}</strong> n'a pas pu accepter votre demande de rendez-vous.</p>
+
+    {{ include('emails/_booking_card.html.twig') }}
+
+    <p>Vous pouvez choisir un autre créneau quand vous le souhaitez :</p>
+    <p style="margin:24px 0;">
+        <a href="{{ url('app_calendar', {company: company.slug, calendar: booking.calendar.slug}) }}" style="display:inline-block; padding:12px 20px; background:#0f5c56; border-radius:999px; color:#f6f1e7; font-weight:bold; text-decoration:none;">Choisir un autre créneau</a>
+    </p>
+    <p style="margin-bottom:0;">À bientôt !</p>
+{% endblock %}

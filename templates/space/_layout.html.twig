@@ -20,10 +20,15 @@
         </span>
         <nav class="space-nav" aria-label="Espace entreprise">
             <a href="{{ path('app_space') }}"{% if current_route == 'app_space' %} aria-current="page"{% endif %}>Accueil</a>
+            <a href="{{ path('app_space_bookings') }}"{% if current_route starts with 'app_space_booking' %} aria-current="page"{% endif %}>Rendez-vous</a>
             <a href="{{ path('app_space_calendars') }}"{% if current_route starts with 'app_space_calendar' %} aria-current="page"{% endif %}>Calendriers</a>
             {% if is_granted('ROLE_COMPANY_OWNER') %}
                 <a href="{{ path('app_space_services') }}"{% if current_route starts with 'app_space_service' %} aria-current="page"{% endif %}>Prestations</a>
             {% endif %}
+            {% if is_granted('ROLE_COMPANY_OWNER') %}
+                <a href="{{ path('app_space_company') }}"{% if current_route == 'app_space_company' %} aria-current="page"{% endif %}>Entreprise</a>
+            {% endif %}
+            <a href="{{ path('app_space_account') }}"{% if current_route == 'app_space_account' %} aria-current="page"{% endif %}>Mon compte</a>
             <a href="{{ path('app_company', {company: company.slug}) }}" target="_blank" rel="noopener">Ma page ↗</a>
         </nav>
     </div>
