@@ -15,6 +15,7 @@ class OpeningHourRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, OpeningHour::class);
     }
+
     /** @return array<int, list<OpeningHour>> Les plages d'ouverture par jour ISO (1 = lundi), triées par heure */
     public function findAllByDay(): array
     {

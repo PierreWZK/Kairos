@@ -6,8 +6,10 @@ use App\Entity\Booking;
 use App\Entity\OpeningHour;
 use App\Entity\Service;
 use App\Entity\TimeOff;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Données de démo : un coach fictif, ses prestations, ses horaires et quelques rendez-vous.
@@ -33,8 +35,20 @@ class AppFixtures extends Fixture
         [['14:00', 1], ['16:30', 0]],
     ];
 
+    /** Compte de démo du back-office (dev uniquement : les fixtures ne sont jamais chargées en production) */
+    public const string ADMIN_EMAIL = 'admin@kairos.test';
+    public const string ADMIN_PASSWORD = 'kairos-demo';
+
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    ) {
+    }
+
     public function load(ObjectManager $manager): void
     {
+        $admin = (new User())->setEmail(self::ADMIN_EMAIL)->setRoles(['ROLE_ADMIN']);
+        $manager->persist($admin->setPassword($this->passwordHasher->hashPassword($admin, self::ADMIN_PASSWORD)));
+
         $services = $this->loadServices($manager);
         $this->loadOpeningHours($manager);
         $timeOffDay = $this->loadTimeOff($manager);

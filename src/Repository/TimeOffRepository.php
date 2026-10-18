@@ -15,6 +15,7 @@ class TimeOffRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TimeOff::class);
     }
+
     /** @return list<TimeOff> Les fermetures qui chevauchent la période [from, to[ */
     public function findOverlapping(\DateTimeImmutable $from, \DateTimeImmutable $to): array
     {

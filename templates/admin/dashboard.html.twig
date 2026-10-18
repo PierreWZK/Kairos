@@ -1,0 +1,49 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Tableau de bord{% endblock %}
+
+{% macro booking_rows(bookings) %}
+    <table class="table datagrid">
+        <thead>
+            <tr><th>Horaire</th><th>Client</th><th>Prestation</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+                <tr>
+                    <td>
+                        <strong>{{ booking.startsAt|format_date(pattern: 'EEE d MMM')|capitalize }}</strong>
+                        {{ booking.startsAt|date('H:i') }} → {{ booking.endsAt|date('H:i') }}
+                    </td>
+                    <td>
+                        {{ booking.customerName }}<br>
+                        <a href="mailto:{{ booking.customerEmail }}">{{ booking.customerEmail }}</a>
+                        {% if booking.customerPhone %} · {{ booking.customerPhone }}{% endif %}
+                    </td>
+                    <td>{{ booking.service.name }}</td>
+                    <td class="text-end"><a href="{{ path('admin_booking_detail', {entityId: booking.id}) }}">Voir</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
+{% block main %}
+    <section class="mb-5">
+        <h2 class="h5">Aujourd'hui · {{ 'now'|format_date(pattern: 'EEEE d MMMM') }}</h2>
+        {% if today is empty %}
+            <p class="text-muted">Aucun rendez-vous à venir aujourd'hui.</p>
+        {% else %}
+            {{ _self.booking_rows(today) }}
+        {% endif %}
+    </section>
+
+    <section>
+        <h2 class="h5">Prochains rendez-vous</h2>
+        {% if next is empty %}
+            <p class="text-muted">Aucun rendez-vous prévu.</p>
+        {% else %}
+            {{ _self.booking_rows(next) }}
+            <p><a href="{{ path('admin_booking_index') }}">Toutes les réservations →</a></p>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -60,12 +60,12 @@ class OpeningHour
 
     public function getDayName(): string
     {
-        return self::DAY_NAMES[$this->dayOfWeek];
+        return self::DAY_NAMES[$this->dayOfWeek] ?? '?';
     }
 
-    public function setDayOfWeek(int $dayOfWeek): static
+    public function setDayOfWeek(?int $dayOfWeek): static
     {
-        $this->dayOfWeek = $dayOfWeek;
+        $this->dayOfWeek = $dayOfWeek ?? 0;
 
         return $this;
     }
@@ -75,7 +75,7 @@ class OpeningHour
         return $this->startTime;
     }
 
-    public function setStartTime(\DateTimeImmutable $startTime): static
+    public function setStartTime(?\DateTimeImmutable $startTime): static
     {
         $this->startTime = $startTime;
 
@@ -87,7 +87,7 @@ class OpeningHour
         return $this->endTime;
     }
 
-    public function setEndTime(\DateTimeImmutable $endTime): static
+    public function setEndTime(?\DateTimeImmutable $endTime): static
     {
         $this->endTime = $endTime;
 

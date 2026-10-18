@@ -104,7 +104,7 @@ class Booking
         return $this->service;
     }
 
-    public function setService(Service $service): static
+    public function setService(?Service $service): static
     {
         $this->service = $service;
         $this->refreshEndsAt();
@@ -117,7 +117,7 @@ class Booking
         return $this->startsAt;
     }
 
-    public function setStartsAt(\DateTimeImmutable $startsAt): static
+    public function setStartsAt(?\DateTimeImmutable $startsAt): static
     {
         $this->startsAt = $startsAt;
         $this->refreshEndsAt();
@@ -135,9 +135,9 @@ class Booking
         return $this->customerName;
     }
 
-    public function setCustomerName(string $customerName): static
+    public function setCustomerName(?string $customerName): static
     {
-        $this->customerName = $customerName;
+        $this->customerName = $customerName ?? '';
 
         return $this;
     }
@@ -147,9 +147,9 @@ class Booking
         return $this->customerEmail;
     }
 
-    public function setCustomerEmail(string $customerEmail): static
+    public function setCustomerEmail(?string $customerEmail): static
     {
-        $this->customerEmail = $customerEmail;
+        $this->customerEmail = $customerEmail ?? '';
 
         return $this;
     }

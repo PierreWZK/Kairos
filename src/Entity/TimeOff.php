@@ -47,7 +47,7 @@ class TimeOff
         return $this->startsAt;
     }
 
-    public function setStartsAt(\DateTimeImmutable $startsAt): static
+    public function setStartsAt(?\DateTimeImmutable $startsAt): static
     {
         $this->startsAt = $startsAt;
 
@@ -59,7 +59,7 @@ class TimeOff
         return $this->endsAt;
     }
 
-    public function setEndsAt(\DateTimeImmutable $endsAt): static
+    public function setEndsAt(?\DateTimeImmutable $endsAt): static
     {
         $this->endsAt = $endsAt;
 

@@ -55,9 +55,9 @@ class Service
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
-        $this->name = $name;
+        $this->name = $name ?? '';
 
         return $this;
     }
@@ -79,9 +79,9 @@ class Service
         return $this->durationMinutes;
     }
 
-    public function setDurationMinutes(int $durationMinutes): static
+    public function setDurationMinutes(?int $durationMinutes): static
     {
-        $this->durationMinutes = $durationMinutes;
+        $this->durationMinutes = $durationMinutes ?? 0;
 
         return $this;
     }
@@ -91,9 +91,9 @@ class Service
         return $this->priceCents;
     }
 
-    public function setPriceCents(int $priceCents): static
+    public function setPriceCents(?int $priceCents): static
     {
-        $this->priceCents = $priceCents;
+        $this->priceCents = $priceCents ?? 0;
 
         return $this;
     }
@@ -103,9 +103,9 @@ class Service
         return $this->isActive;
     }
 
-    public function setIsActive(bool $isActive): static
+    public function setIsActive(?bool $isActive): static
     {
-        $this->isActive = $isActive;
+        $this->isActive = (bool) $isActive;
 
         return $this;
     }

@@ -42,10 +42,19 @@ final class BookingMailer
         $this->send($this->toOwner($booking, 'Nouveau rendez-vous', 'emails/owner_new.html.twig'), $booking);
     }
 
-    public function sendCancellation(Booking $booking): void
+    /**
+     * @param bool $byOwner true quand le professionnel annule depuis le back-office : le client est prévenu
+     *                      que l'annulation vient de lui, et le professionnel ne reçoit pas de notification de son propre geste
+     */
+    public function sendCancellation(Booking $booking, bool $byOwner = false): void
     {
-        $this->send($this->toCustomer($booking, 'Votre rendez-vous est annulé', 'emails/customer_cancellation.html.twig'), $booking);
-        $this->send($this->toOwner($booking, 'Rendez-vous annulé', 'emails/owner_cancellation.html.twig'), $booking);
+        $email = $this->toCustomer($booking, 'Votre rendez-vous est annulé', 'emails/customer_cancellation.html.twig');
+        $email->context([...$email->getContext(), 'cancelled_by_owner' => $byOwner]);
+        $this->send($email, $booking);
+
+        if (!$byOwner) {
+            $this->send($this->toOwner($booking, 'Rendez-vous annulé', 'emails/owner_cancellation.html.twig'), $booking);
+        }
     }
 
     private function toCustomer(Booking $booking, string $subject, string $template): TemplatedEmail

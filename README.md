@@ -6,7 +6,7 @@ Kairos est une application de **réservation de créneaux en ligne**. Un profess
 
 Le nom vient du grec ancien *kairos*, « le moment opportun », par opposition à *chronos*, le temps qui s'écoule.
 
-🚧 **En cours :** pour l'instant, seule la page vitrine existe.
+🚧 **En cours :** l'application fonctionne de bout en bout ; restent les tests automatisés et la mise en ligne.
 
 ## Le projet
 
@@ -34,26 +34,42 @@ Le nom vient du grec ancien *kairos*, « le moment opportun », par opposition �
 ## Avancement
 
 - [x] Installation de Symfony 8, page vitrine
-- [ ] Base de données et entités (prestations, horaires, réservations)
-- [ ] Agenda et réservation côté client
-- [ ] Back-office EasyAdmin
-- [ ] E-mails et annulation
+- [x] Base de données et entités (prestations, horaires, réservations)
+- [x] Agenda et réservation côté client
+- [x] E-mails et annulation
+- [x] Back-office EasyAdmin
+- [ ] Tests automatisés
 - [ ] Mise en ligne
 
 ## Prérequis
 
 - PHP 8.4 ou plus, avec l'extension `intl`
 - Composer
+- MySQL 8
 - [Symfony CLI](https://symfony.com/download) (conseillée)
 
 ## Lancer en local
 
 ```bash
 composer install
+
+# Identifiants MySQL réels dans .env.local (jamais versionné)
+echo 'DATABASE_URL="mysql://kairos:motdepasse@127.0.0.1:3306/kairos?serverVersion=8.4.0&charset=utf8mb4"' > .env.local
+
+php bin/console doctrine:database:create --if-not-exists
+php bin/console doctrine:migrations:migrate
+php bin/console doctrine:fixtures:load    # données de démo + compte admin@kairos.test / kairos-demo
+
 symfony serve -d          # http://127.0.0.1:8000
 ```
 
 Sans la CLI Symfony : `php -S 127.0.0.1:8000 -t public`.
+
+- Site : http://127.0.0.1:8000
+- Back-office : http://127.0.0.1:8000/admin (compte de démo `admin@kairos.test` / `kairos-demo`)
+- E-mails : en dev, rien ne part (`MAILER_DSN=null://null`) ; ils sont visibles dans le profiler, onglet **E-mails**.
+
+En production, le compte du professionnel se crée avec `php bin/console app:create-admin vous@exemple.fr` (mot de passe demandé de façon masquée).
 
 ## Structure
 

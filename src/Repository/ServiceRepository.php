@@ -15,6 +15,7 @@ class ServiceRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Service::class);
     }
+
     /** @return list<Service> Les prestations proposées aux clients, de la plus courte à la plus longue */
     public function findActive(): array
     {
