@@ -12,19 +12,7 @@
 ] %}
 
 {% block body %}
-<header class="site-header">
-    <div class="container header-inner">
-        <a class="brand" href="{{ path('app_home') }}">
-            <span class="brand-mark" aria-hidden="true"></span>
-            Kairos
-        </a>
-        <nav class="nav" aria-label="Navigation principale">
-            <a href="#fonctionnement">Fonctionnement</a>
-            <a href="#fonctionnalites">Fonctionnalités</a>
-            <a href="#regles">Règles</a>
-        </nav>
-    </div>
-</header>
+{{ include('_header.html.twig') }}
 
 <main>
     <section class="hero">
@@ -38,7 +26,7 @@
                     depuis un back-office.
                 </p>
                 <div class="hero-actions">
-                    <span class="button button-disabled" aria-disabled="true">Réservations bientôt ouvertes</span>
+                    <a class="button button-primary" href="{{ path('app_booking_services') }}">Réserver un créneau</a>
                     <a class="button button-ghost" href="#fonctionnement">Voir comment ça marche</a>
                 </div>
             </div>
@@ -147,10 +135,5 @@
     </section>
 </main>
 
-<footer class="site-footer">
-    <div class="container footer-inner">
-        <span>Kairos · Jour 05 du défi 30 jours, 30 projets</span>
-        <span>Fait avec Symfony · <a href="https://github.com/PierreWZK/Kairos" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
-    </div>
-</footer>
+{{ include('_footer.html.twig') }}
 {% endblock %}

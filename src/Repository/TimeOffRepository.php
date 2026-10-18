@@ -15,4 +15,16 @@ class TimeOffRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TimeOff::class);
     }
+    /** @return list<TimeOff> Les fermetures qui chevauchent la période [from, to[ */
+    public function findOverlapping(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.startsAt < :to')
+            ->andWhere('t.endsAt > :from')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('t.startsAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

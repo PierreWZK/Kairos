@@ -213,11 +213,18 @@ a {
     text-decoration: none;
 }
 
-.button-disabled {
+.button-primary {
     background: var(--primary);
     color: var(--primary-ink);
-    opacity: 0.55;
-    cursor: not-allowed;
+}
+
+.button-primary:hover {
+    background: color-mix(in srgb, var(--primary) 85%, var(--ink));
+}
+
+.button-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
 }
 
 .button-ghost {
@@ -489,6 +496,212 @@ a {
     border-left: 3px solid var(--accent);
 }
 
+/* Pages de réservation */
+
+.page {
+    padding: 3rem 0 5rem;
+}
+
+.page-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    font-weight: 600;
+}
+
+.page-lede {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--ink);
+}
+
+.empty {
+    margin-top: 2rem;
+    color: var(--muted);
+}
+
+.services {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.service-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.service-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.service-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.service-name {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.service-price {
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.service-duration {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.service-description {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.service-cta {
+    margin-top: auto;
+    padding-top: 0.8rem;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.planner {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.planner-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.planner-week {
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.planner-nav {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 1.2rem;
+    text-decoration: none;
+}
+
+a.planner-nav:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.planner-nav.is-disabled {
+    color: var(--line);
+}
+
+.planner-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.6rem;
+}
+
+.planner-dayname {
+    margin-bottom: 0.6rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.planner-dayname strong {
+    display: block;
+    color: var(--ink);
+    font-size: 0.95rem;
+}
+
+.planner-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.planner-slots .slot {
+    display: block;
+}
+
+.planner-closed {
+    padding: 1rem 0.25rem;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.slot-unavailable {
+    background: transparent;
+    color: var(--slot-taken-ink);
+    opacity: 0.6;
+}
+
+.dot-unavailable {
+    border: 1px solid var(--slot-taken-ink);
+}
+
+.planner-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
 /* Pied de page */
 
 .site-footer {
@@ -526,6 +739,40 @@ a {
     .sides,
     .rules {
         grid-template-columns: 1fr;
+    }
+
+    /* L'agenda passe en liste : un jour par ligne, ses créneaux à la suite */
+    .planner-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .planner-day {
+        display: grid;
+        grid-template-columns: 4.5rem 1fr;
+        gap: 0.75rem;
+        padding: 0.9rem 0;
+        border-top: 1px solid var(--line);
+    }
+
+    .planner-dayname {
+        margin: 0;
+        text-align: left;
+    }
+
+    .planner-slots {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .planner-slots .slot {
+        min-width: 4rem;
+        padding-inline: 0.5rem;
+    }
+
+    .planner-closed {
+        padding: 0.4rem 0.75rem;
+        text-align: left;
     }
 }
 

@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choisir une prestation · Kairos{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        <p class="eyebrow">Étape 1 sur 3</p>
+        <h1 class="page-title">Choisissez une prestation</h1>
+        <p class="page-lede">L'agenda n'affichera que les créneaux où elle tient en entier.</p>
+
+        {% if services is empty %}
+            <p class="empty">Aucune prestation n'est proposée pour le moment.</p>
+        {% else %}
+            <ul class="services">
+                {% for service in services %}
+                    <li>
+                        <a class="service-card" href="{{ path('app_booking_agenda', {id: service.id}) }}">
+                            <span class="service-head">
+                                <span class="service-name">{{ service.name }}</span>
+                                <span class="service-price">{{ service.priceCents|price }}</span>
+                            </span>
+                            <span class="service-duration">{{ service.durationMinutes|duration }}</span>
+                            {% if service.description %}
+                                <span class="service-description">{{ service.description }}</span>
+                            {% endif %}
+                            <span class="service-cta">Voir les créneaux →</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}

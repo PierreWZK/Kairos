@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ service.name }} · Kairos{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        <a class="back-link" href="{{ path('app_booking_services') }}">← Changer de prestation</a>
+
+        <p class="eyebrow">Étape 2 sur 3</p>
+        <h1 class="page-title">{{ service.name }}</h1>
+        <p class="page-lede">{{ service.durationMinutes|duration }} · {{ service.priceCents|price }} — choisissez un créneau libre.</p>
+
+        <section class="planner" aria-labelledby="planner-week">
+            <div class="planner-head">
+                {% if previous_week %}
+                    <a class="planner-nav" href="{{ path('app_booking_agenda', {id: service.id, semaine: previous_week|date('Y-m-d')}) }}" aria-label="Semaine précédente">‹</a>
+                {% else %}
+                    <span class="planner-nav is-disabled" aria-hidden="true">‹</span>
+                {% endif %}
+
+                <h2 id="planner-week" class="planner-week">
+                    Semaine du {{ week|format_date(pattern: 'd MMMM') }} au {{ week|date_modify('+6 days')|format_date(pattern: 'd MMMM y') }}
+                </h2>
+
+                {% if next_week %}
+                    <a class="planner-nav" href="{{ path('app_booking_agenda', {id: service.id, semaine: next_week|date('Y-m-d')}) }}" aria-label="Semaine suivante">›</a>
+                {% else %}
+                    <span class="planner-nav is-disabled" aria-hidden="true">›</span>
+                {% endif %}
+            </div>
+
+            <div class="planner-grid">
+                {% for day in days %}
+                    <div class="planner-day{{ day.closed ? ' is-closed' }}">
+                        <p class="planner-dayname">
+                            {{ day.date|format_date(pattern: 'EEE')|capitalize }}
+                            <strong>{{ day.date|format_date(pattern: 'd MMM') }}</strong>
+                        </p>
+
+                        {% if day.closed %}
+                            <p class="planner-closed">{{ day.closedReason ?? 'Fermé' }}</p>
+                        {% else %}
+                            <ul class="planner-slots">
+                                {% for slot in day.slots %}
+                                    <li>
+                                        <span class="slot slot-{{ slot.status.value }}"
+                                              title="{{ slot.start|date('H:i') }} → {{ slot.end|date('H:i') }}">{{ slot.start|date('H:i') }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="planner-foot">
+                <span class="legend"><span class="dot dot-free"></span>Libre</span>
+                <span class="legend"><span class="dot dot-taken"></span>Réservé</span>
+                <span class="legend"><span class="dot dot-unavailable"></span>Indisponible</span>
+            </div>
+        </section>
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}
