@@ -31,3 +31,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+when@test:
+    services:
+        # Sans Monolog, le logger par défaut écrit sur la sortie d'erreur : les erreurs attendues
+        # des tests (403, 404, CSRF refusé…) iraient polluer la sortie de PHPUnit. Le dossier de cache
+        # existe toujours au démarrage du kernel, contrairement à var/log/
+        logger:
+            class: Symfony\Component\HttpKernel\Log\Logger
+            arguments: [null, '%kernel.cache_dir%/test.log']

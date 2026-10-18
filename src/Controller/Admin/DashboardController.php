@@ -36,6 +36,7 @@ final class DashboardController extends AbstractDashboardController
         }
 
         return $this->render('admin/dashboard.html.twig', [
+            'now' => $now,
             'today' => $today,
             'next' => \array_slice($next, 0, 10),
         ]);
