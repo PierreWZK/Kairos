@@ -1,0 +1,21 @@
+{# En-tête d'un calendrier et ses onglets. Variables : calendar, tab (settings|hours|time_off|embed) #}
+<a class="back-link" href="{{ path('app_space_calendars') }}">← Calendriers</a>
+<div class="space-head">
+    <div>
+        <h1 class="page-title">{{ calendar.name }} {{ include('space/calendars/_status.html.twig') }}</h1>
+        <p class="page-meta">
+            <a href="{{ path('app_calendar', {company: calendar.company.slug, calendar: calendar.slug}) }}" target="_blank" rel="noopener">{{ url('app_calendar', {company: calendar.company.slug, calendar: calendar.slug}) }} ↗</a>
+        </p>
+    </div>
+</div>
+
+<nav class="tabs" aria-label="Calendrier {{ calendar.name }}">
+    {% for key, item in {
+        settings: ['Réglages', 'app_space_calendar_edit'],
+        hours: ['Horaires', 'app_space_calendar_hours'],
+        time_off: ['Fermetures', 'app_space_calendar_time_off'],
+        embed: ['Intégration', 'app_space_calendar_embed'],
+    } %}
+        <a href="{{ path(item[1], {id: calendar.id}) }}"{% if key == tab %} aria-current="page"{% endif %}>{{ item[0] }}</a>
+    {% endfor %}
+</nav>

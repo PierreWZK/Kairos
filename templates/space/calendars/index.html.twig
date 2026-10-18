@@ -1,0 +1,44 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = app.user.company %}
+
+{% block title %}Calendriers · {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="space-head">
+    <div>
+        <h1 class="page-title">Calendriers</h1>
+        <p class="page-lede">Chacun a ses horaires, ses fermetures, ses prestations et ses règles de réservation.</p>
+    </div>
+    {% if is_granted('ROLE_COMPANY_OWNER') %}
+        <a class="button button-primary" href="{{ path('app_space_calendar_new') }}">Nouveau calendrier</a>
+    {% endif %}
+</div>
+
+{% if calendars is empty %}
+    <p class="empty">
+        {{ is_granted('ROLE_COMPANY_OWNER') ? 'Aucun calendrier pour le moment : créez le premier.' : 'Aucun calendrier ne vous est attribué pour le moment.' }}
+    </p>
+{% else %}
+    <ul class="services">
+        {% for calendar in calendars %}
+            <li>
+                <a class="service-card calendar-card" href="{{ path('app_space_calendar_edit', {id: calendar.id}) }}">
+                    <span class="calendar-card-head">
+                        <span class="monogram" aria-hidden="true">{{ calendar.name|first|upper }}</span>
+                        <span class="service-name">{{ calendar.name }}</span>
+                        {{ include('space/calendars/_status.html.twig') }}
+                    </span>
+                    <span class="service-duration">/{{ company.slug }}/{{ calendar.slug }}</span>
+                    <span class="service-description">
+                        {{ calendar.offeredServices|length }} prestation{{ calendar.offeredServices|length > 1 ? 's' }}
+                        · créneaux toutes les {{ calendar.slotStepMinutes }} min
+                        {% if calendar.requiresApproval %}· validation manuelle{% endif %}
+                    </span>
+                    <span class="service-cta">Gérer →</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

@@ -18,7 +18,7 @@
     <div>
         {{ form_label(form.companySlug) }}
         {{ form_widget(form.companySlug) }}
-        <p class="slug-preview">{{ url('app_home') }}<strong data-slug-preview>{{ form.companySlug.vars.value ?: 'votre-entreprise' }}</strong></p>
+        <p class="slug-preview">{{ url('app_home') }}<strong data-slug-preview="votre-entreprise">{{ form.companySlug.vars.value ?: 'votre-entreprise' }}</strong></p>
         {{ form_help(form.companySlug) }}
         {{ form_errors(form.companySlug) }}
     </div>
@@ -36,33 +36,4 @@
     <span>Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a></span>
 </div>
 
-<script>
-    // Propose le lien à partir du nom, tant que le lien n'a pas été modifié à la main
-    (function () {
-        var source = document.querySelector('[data-slug-source]');
-        var target = document.querySelector('[data-slug-target]');
-        var preview = document.querySelector('[data-slug-preview]');
-        if (!source || !target) {
-            return;
-        }
-        var touched = target.value !== '';
-        var slugify = function (text) {
-            return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
-        };
-        var show = function () {
-            preview.textContent = target.value || 'votre-entreprise';
-        };
-        source.addEventListener('input', function () {
-            if (!touched) {
-                target.value = slugify(source.value);
-                show();
-            }
-        });
-        target.addEventListener('input', function () {
-            touched = target.value !== '';
-            show();
-        });
-    })();
-</script>
 {% endblock %}

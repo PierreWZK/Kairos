@@ -1,0 +1,43 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = calendar.company %}
+{% import _self as hours %}
+
+{# Une plage : jour, début, fin, bouton « retirer ». Sert aussi de modèle pour les plages ajoutées dans la page #}
+{% macro hour_row(entry) %}
+    <div class="hour-row" data-collection-item>
+        <div>{{ form_label(entry.dayOfWeek) }}{{ form_widget(entry.dayOfWeek) }}</div>
+        <div>{{ form_label(entry.startTime) }}{{ form_widget(entry.startTime) }}</div>
+        <div>{{ form_label(entry.endTime) }}{{ form_widget(entry.endTime) }}</div>
+        <button type="button" class="button button-ghost button-small" data-collection-remove aria-label="Retirer cette plage">Retirer</button>
+        {% if not entry.vars.valid %}
+            <div class="hour-errors">{{ form_errors(entry.startTime) }}{{ form_errors(entry.endTime) }}{{ form_errors(entry.dayOfWeek) }}</div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% block title %}{{ calendar.name }} · Horaires{% endblock %}
+
+{% block content %}
+{{ include('space/calendars/_header.html.twig', {tab: 'hours'}) }}
+
+<p class="page-meta">La semaine type du calendrier, à l'heure de l'entreprise ({{ calendar.company.timezone }}). Plusieurs plages par jour pour une pause : 9 h – 12 h puis 14 h – 18 h, par exemple.</p>
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    {% if form.openingHours.vars.errors|length %}
+        <div class="flash flash-warning">{{ form_errors(form.openingHours) }}</div>
+    {% endif %}
+
+    <div data-collection data-prototype="{{ hours.hour_row(form.openingHours.vars.prototype)|e('html_attr') }}">
+        <div class="hour-list" data-collection-list>
+            {% for entry in form.openingHours %}
+                {{ hours.hour_row(entry) }}
+            {% endfor %}
+        </div>
+        <button type="button" class="button button-ghost button-small" data-collection-add>+ Ajouter une plage</button>
+    </div>
+    {% do form.openingHours.setRendered %}
+
+    <button type="submit" class="button button-primary">Enregistrer les horaires</button>
+{{ form_end(form) }}
+{% endblock %}

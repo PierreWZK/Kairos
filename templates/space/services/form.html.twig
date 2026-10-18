@@ -1,0 +1,36 @@
+{% extends 'space/_layout.html.twig' %}
+{% form_theme form 'space/_form_theme.html.twig' %}
+
+{% set company = app.user.company %}
+
+{% block title %}{{ service ? service.name : 'Nouvelle prestation' }} · Prestations{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ path('app_space_services') }}">← Prestations</a>
+<h1 class="page-title">{{ service ? service.name : 'Nouvelle prestation' }}</h1>
+{% if not service %}
+    <p class="page-lede">Elle sera proposée sur tous vos calendriers ; décochez-la dans les réglages de ceux qui ne l'offrent pas.</p>
+{% endif %}
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.description) }}
+    <div class="form-grid">
+        {{ form_row(form.durationMinutes) }}
+        {{ form_row(form.priceCents) }}
+    </div>
+    {{ form_row(form.isActive) }}
+    <button type="submit" class="button button-primary">{{ service ? 'Enregistrer' : 'Ajouter la prestation' }}</button>
+{{ form_end(form) }}
+
+{% if service %}
+    <details class="cancel-box danger-zone">
+        <summary>Supprimer cette prestation</summary>
+        <p>Une prestation déjà réservée ne peut pas être supprimée : désactivez-la plutôt.</p>
+        <form method="post" action="{{ path('app_space_service_delete', {id: service.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete-service-' ~ service.id) }}">
+            <button type="submit" class="button button-danger">Supprimer « {{ service.name }} »</button>
+        </form>
+    </details>
+{% endif %}
+{% endblock %}

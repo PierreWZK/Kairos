@@ -44,7 +44,7 @@ final class BookingType extends AbstractType
                 'attr' => ['autocomplete' => 'tel'],
             ]);
 
-        if ($calendar->areNotesEnabled()) {
+        if ($calendar->isNotesEnabled()) {
             $builder->add('note', TextareaType::class, [
                 'label' => 'Un mot pour préparer le rendez-vous',
                 'required' => false,

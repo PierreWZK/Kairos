@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Un agenda réservable d'une entreprise (une personne, une salle, un lieu…), avec ses propres
@@ -100,6 +101,7 @@ class Calendar
     /** @var Collection<int, OpeningHour> */
     #[ORM\OneToMany(targetEntity: OpeningHour::class, mappedBy: 'calendar', cascade: ['persist'], orphanRemoval: true)]
     #[ORM\OrderBy(['dayOfWeek' => 'ASC', 'startTime' => 'ASC'])]
+    #[Assert\Valid]
     private Collection $openingHours;
 
     /** @var Collection<int, User> Les membres de l'entreprise qui gèrent ce calendrier */
@@ -117,6 +119,43 @@ class Calendar
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    /** Deux plages d'un même jour ne peuvent pas se chevaucher */
+    #[Assert\Callback]
+    public function validateOpeningHours(ExecutionContextInterface $context): void
+    {
+        $hours = array_values(array_filter(
+            $this->openingHours->toArray(),
+            static fn (OpeningHour $h): bool => null !== $h->getStartTime() && null !== $h->getEndTime(),
+        ));
+        usort($hours, static fn (OpeningHour $a, OpeningHour $b): int => [$a->getDayOfWeek(), $a->getStartTime()] <=> [$b->getDayOfWeek(), $b->getStartTime()]);
+
+        for ($i = 1, $n = \count($hours); $i < $n; ++$i) {
+            $previous = $hours[$i - 1];
+            if ($previous->getDayOfWeek() === $hours[$i]->getDayOfWeek() && $hours[$i]->getStartTime() < $previous->getEndTime()) {
+                $context->buildViolation(sprintf('Deux plages du %s se chevauchent.', mb_strtolower($previous->getDayName())))
+                    ->atPath('openingHours')
+                    ->addViolation();
+
+                return;
+            }
+        }
+    }
+
+    /** Horaires de départ d'un nouveau calendrier : du lundi au vendredi, 9 h – 12 h et 14 h – 18 h */
+    public function addDefaultOpeningHours(): static
+    {
+        foreach (range(1, 5) as $day) {
+            foreach ([['09:00', '12:00'], ['14:00', '18:00']] as [$start, $end]) {
+                $this->addOpeningHour((new OpeningHour())
+                    ->setDayOfWeek($day)
+                    ->setStartTime(new \DateTimeImmutable('1970-01-01 '.$start))
+                    ->setEndTime(new \DateTimeImmutable('1970-01-01 '.$end)));
+            }
+        }
+
+        return $this;
     }
 
     public function getId(): ?int
@@ -262,7 +301,7 @@ class Calendar
         return $this;
     }
 
-    public function areNotesEnabled(): bool
+    public function isNotesEnabled(): bool
     {
         return $this->notesEnabled;
     }

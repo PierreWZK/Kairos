@@ -1,0 +1,26 @@
+{% extends 'space/_layout.html.twig' %}
+{% form_theme form 'space/_form_theme.html.twig' %}
+
+{% set company = calendar.company %}
+
+{% block title %}{{ calendar.name }} · Réglages{% endblock %}
+
+{% block content %}
+{{ include('space/calendars/_header.html.twig', {tab: 'settings'}) }}
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    {{ include('space/calendars/_settings_fields.html.twig') }}
+    <button type="submit" class="button button-primary">Enregistrer</button>
+{{ form_end(form) }}
+
+{% if is_granted('ROLE_COMPANY_OWNER') %}
+    <details class="cancel-box danger-zone">
+        <summary>Supprimer ce calendrier</summary>
+        <p>Ses horaires et fermetures sont supprimés avec lui. Un calendrier qui a déjà des rendez-vous ne peut pas être supprimé : fermez-le plutôt.</p>
+        <form method="post" action="{{ path('app_space_calendar_delete', {id: calendar.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete-calendar-' ~ calendar.id) }}">
+            <button type="submit" class="button button-danger">Supprimer « {{ calendar.name }} »</button>
+        </form>
+    </details>
+{% endif %}
+{% endblock %}

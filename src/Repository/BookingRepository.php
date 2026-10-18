@@ -59,6 +59,38 @@ class BookingRepository extends ServiceEntityRepository
         return $this->count(['service' => $service]);
     }
 
+    public function countForCalendar(Calendar $calendar): int
+    {
+        return $this->count(['calendar' => $calendar]);
+    }
+
+    /**
+     * @param list<Calendar> $calendars
+     *
+     * @return list<Booking> Les prochains rendez-vous (en attente ou confirmés) de ces calendriers, les plus proches d'abord
+     */
+    public function findUpcomingFor(array $calendars, \DateTimeImmutable $from, int $limit): array
+    {
+        if ([] === $calendars) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('b')
+            ->addSelect('s', 'c')
+            ->join('b.service', 's')
+            ->join('b.calendar', 'c')
+            ->andWhere('b.calendar IN (:calendars)')
+            ->andWhere('b.status IN (:statuses)')
+            ->andWhere('b.endsAt > :from')
+            ->setParameter('calendars', $calendars)
+            ->setParameter('statuses', BookingStatus::blocking())
+            ->setParameter('from', self::utc($from))
+            ->orderBy('b.startsAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     /** Doctrine enregistre et compare l'heure telle quelle : les bornes doivent être en UTC, comme la base */
     private static function utc(\DateTimeImmutable $date): \DateTimeImmutable
     {

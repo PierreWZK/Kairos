@@ -32,6 +32,19 @@ class TimeOffRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<TimeOff> Les fermetures du calendrier en cours ou à venir, les plus proches d'abord */
+    public function findCurrentAndUpcoming(Calendar $calendar, \DateTimeImmutable $now): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.calendar = :calendar')
+            ->andWhere('t.endsAt > :now')
+            ->setParameter('calendar', $calendar)
+            ->setParameter('now', self::utc($now))
+            ->orderBy('t.startsAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /** Doctrine enregistre et compare l'heure telle quelle : les bornes doivent être en UTC, comme la base */
     private static function utc(\DateTimeImmutable $date): \DateTimeImmutable
     {

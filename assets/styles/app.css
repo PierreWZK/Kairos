@@ -233,6 +233,7 @@ a {
 .button-ghost {
     border: 1px solid var(--line);
     background: var(--surface);
+    color: var(--ink);
 }
 
 .button-ghost:hover {
@@ -1469,8 +1470,8 @@ a.slot-free:focus-visible {
 
 .space-link {
     font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-    font-size: 0.9rem;
-    word-break: break-all;
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
 }
 
 .verify-box {
@@ -1492,6 +1493,298 @@ a.slot-free:focus-visible {
     font-weight: 600;
 }
 
+/* Espace entreprise : barre, onglets, listes, formulaires */
+
+.space-bar {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.space-bar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    min-height: 60px;
+    padding-block: 0.5rem;
+}
+
+.space-nav,
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.space-nav a,
+.tabs a {
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.space-nav a:hover,
+.tabs a:hover {
+    color: var(--ink);
+}
+
+.space-nav a[aria-current='page'],
+.tabs a[aria-current='page'] {
+    background: color-mix(in oklab, var(--primary) 12%, var(--surface));
+    color: var(--primary);
+}
+
+.tabs {
+    margin: 1.5rem 0 1.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.space-page {
+    padding-top: 2rem;
+}
+
+.space-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+}
+
+.space-head .page-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.space-head .page-meta a {
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.space-section {
+    margin-top: 2.5rem;
+}
+
+.space-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.space-columns .section-title {
+    margin: 0 0 1rem;
+}
+
+.space-start {
+    margin-top: 1.5rem;
+}
+
+.space-start ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--muted);
+}
+
+.space-start a,
+.space-list a,
+.row-list a,
+.booking-form .help-text a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.space-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    list-style: none;
+}
+
+.space-list strong {
+    display: block;
+    color: var(--ink);
+}
+
+.row-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    list-style: none;
+}
+
+.row-list > li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+}
+
+.row-list > li + li {
+    border-top: 1px solid var(--line);
+}
+
+.row-list .page-meta {
+    display: block;
+    margin-top: 0.15rem;
+}
+
+.row-list form {
+    margin: 0;
+}
+
+.row-list .badge {
+    margin-left: 0.4rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--slot-taken);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    vertical-align: middle;
+}
+
+.badge-success {
+    background: color-mix(in oklab, var(--primary) 14%, var(--surface));
+    color: var(--primary);
+}
+
+.badge-warning {
+    background: color-mix(in oklab, var(--accent) 22%, var(--surface));
+    color: color-mix(in oklab, var(--accent) 45%, var(--ink));
+}
+
+.space-form {
+    max-width: 760px;
+}
+
+.booking-form input[type='checkbox'] {
+    width: auto;
+    margin: 0.25rem 0 0;
+    accent-color: var(--primary);
+}
+
+.check-row {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 0.65rem;
+}
+
+.check-row label {
+    display: block;
+}
+
+.check-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-weight: 400 !important;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.form-grid > div {
+    display: grid;
+    gap: 0.4rem;
+    align-content: start;
+}
+
+.hour-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.hour-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.hour-row > div {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.hour-row label {
+    color: var(--muted);
+    font-size: 0.8rem !important;
+}
+
+.hour-row button {
+    justify-self: stretch !important;
+    height: 2.75rem;
+    border: 1px solid var(--line) !important;
+}
+
+/* Les libellés ne s'affichent qu'au-dessus de la première plage (toujours lus par les lecteurs d'écran) */
+.hour-row + .hour-row label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.hour-errors {
+    grid-column: 1 / -1;
+}
+
+.embed-code .code {
+    margin-bottom: 0.75rem;
+}
+
+.copy-button {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.space-columns .code {
+    margin-bottom: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.danger-zone {
+    max-width: 760px;
+    margin-top: 2.5rem;
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -1503,7 +1796,8 @@ a.slot-free:focus-visible {
     .steps,
     .sides,
     .rules,
-    .integration {
+    .integration,
+    .space-columns {
         grid-template-columns: 1fr;
     }
 
@@ -1561,8 +1855,17 @@ a.slot-free:focus-visible {
         display: none;
     }
 
-    .features {
+    .features,
+    .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .hour-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hour-row > div:first-child {
+        grid-column: 1 / -1;
     }
 
     .company-hero {

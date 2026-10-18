@@ -1,0 +1,30 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = calendar.company %}
+{% set route = {company: company.slug, calendar: calendar.slug} %}
+
+{% block title %}{{ calendar.name }} · Intégration{% endblock %}
+
+{% block content %}
+{{ include('space/calendars/_header.html.twig', {tab: 'embed'}) }}
+
+<div class="space-columns">
+    <section>
+        <h2 class="section-title">Partager le lien</h2>
+        <p class="page-meta">À envoyer à vos clients, à mettre dans votre signature d'e-mail ou sur vos réseaux.</p>
+        <pre class="code" id="calendar-link"><code>{{ url('app_calendar', route) }}</code></pre>
+        <button type="button" class="button button-primary button-small copy-button" data-copy="calendar-link">Copier le lien</button>
+    </section>
+
+    <section>
+        <h2 class="section-title">Intégrer sur votre site</h2>
+        <p class="page-meta">Collez ce code dans une page de votre site, là où le calendrier doit apparaître. Il prend toute la largeur disponible et s'ajuste en hauteur.</p>
+        {{ include('space/_embed_code.html.twig', {
+            id: 'embed-calendar',
+            embed_url: url('app_calendar_embed', route),
+            page_url: url('app_calendar', route),
+        }) }}
+        <p class="help-text"><a href="{{ path('app_calendar_embed', route) }}" target="_blank" rel="noopener">Aperçu de la version intégrée ↗</a></p>
+    </section>
+</div>
+{% endblock %}

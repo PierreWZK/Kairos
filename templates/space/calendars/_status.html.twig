@@ -1,0 +1,10 @@
+{# État d'un calendrier (variable « calendar ») : ce que voit le client #}
+{% if not calendar.active %}
+    <span class="badge">Fermé</span>
+{% elseif calendar.offeredServices is empty %}
+    <span class="badge badge-warning">Aucune prestation</span>
+{% elseif calendar.openingHours is empty %}
+    <span class="badge badge-warning">Aucun horaire</span>
+{% else %}
+    <span class="badge badge-success">Ouvert</span>
+{% endif %}

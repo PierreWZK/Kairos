@@ -1,0 +1,34 @@
+{# Les champs des réglages d'un calendrier, communs à la création et à la modification. Variable : form #}
+<p class="form-group-title">Présentation</p>
+{{ form_row(form.name) }}
+<div>
+    {{ form_label(form.slug) }}
+    {{ form_widget(form.slug) }}
+    <p class="slug-preview">{{ url('app_company', {company: app.user.company.slug}) }}/<strong data-slug-preview="lien">{{ form.slug.vars.value ?: 'lien' }}</strong></p>
+    {{ form_help(form.slug) }}
+    {{ form_errors(form.slug) }}
+</div>
+{{ form_row(form.description) }}
+{{ form_row(form.isActive) }}
+
+<p class="form-group-title">Prestations proposées</p>
+{{ form_widget(form.services) }}
+{{ form_errors(form.services) }}
+{% if is_granted('ROLE_COMPANY_OWNER') %}
+    <p class="help-text">Le catalogue se gère dans <a href="{{ path('app_space_services') }}">Prestations</a>.</p>
+{% endif %}
+
+<p class="form-group-title">Règles de réservation</p>
+<div class="form-grid">
+    {{ form_row(form.slotStepMinutes) }}
+    {{ form_row(form.minNoticeHours) }}
+    {{ form_row(form.horizonWeeks) }}
+    {{ form_row(form.cancelNoticeHours) }}
+</div>
+{{ form_row(form.requiresApproval) }}
+
+<p class="form-group-title">Formulaire du client</p>
+<p class="help-text">Le nom et l'adresse e-mail sont toujours demandés.</p>
+{{ form_row(form.phoneRequired) }}
+{{ form_row(form.notesEnabled) }}
+{{ form_row(form.formMessage) }}

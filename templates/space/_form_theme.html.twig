@@ -1,0 +1,26 @@
+{# Thème des formulaires de l'espace : les cases à cocher à gauche de leur libellé, l'aide en dessous #}
+{% extends 'form_div_layout.html.twig' %}
+
+{% block checkbox_row %}
+    <div class="check-row">
+        {{ form_widget(form) }}
+        <div>
+            {{ form_label(form) }}
+            {{ form_help(form) }}
+            {{ form_errors(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block choice_widget_expanded %}
+    <div {{ block('widget_container_attributes') }} class="check-list">
+        {% for child in form %}
+            <label class="check-item">
+                {{ form_widget(child) }}
+                <span>{{ child.vars.label }}</span>
+            </label>
+        {% else %}
+            <p class="help-text">Aucune pour le moment.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

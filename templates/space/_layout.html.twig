@@ -1,0 +1,40 @@
+{#
+ # Mise en page de l'espace entreprise : l'en-tête Kairos, puis la barre de l'entreprise et sa navigation.
+ # Variable attendue : company. Les formulaires utilisent le thème space/_form_theme.html.twig.
+ #}
+{% extends 'base.html.twig' %}
+
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block body_attributes %} class="branded" style="--brand: {{ company.accentColor }}"{% endblock %}
+
+{% set current_route = app.request.attributes.get('_route') %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<div class="space-bar">
+    <div class="container space-bar-inner">
+        <span class="company-brand">
+            {{ include('booking/_logo.html.twig') }}
+            {{ company.name }}
+        </span>
+        <nav class="space-nav" aria-label="Espace entreprise">
+            <a href="{{ path('app_space') }}"{% if current_route == 'app_space' %} aria-current="page"{% endif %}>Accueil</a>
+            <a href="{{ path('app_space_calendars') }}"{% if current_route starts with 'app_space_calendar' %} aria-current="page"{% endif %}>Calendriers</a>
+            {% if is_granted('ROLE_COMPANY_OWNER') %}
+                <a href="{{ path('app_space_services') }}"{% if current_route starts with 'app_space_service' %} aria-current="page"{% endif %}>Prestations</a>
+            {% endif %}
+            <a href="{{ path('app_company', {company: company.slug}) }}" target="_blank" rel="noopener">Ma page ↗</a>
+        </nav>
+    </div>
+</div>
+
+<main class="page space-page">
+    <div class="container">
+        {{ include('_flashes.html.twig') }}
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'space/_layout.html.twig' %}
+{% form_theme form 'space/_form_theme.html.twig' %}
+
+{% set company = app.user.company %}
+
+{% block title %}Nouveau calendrier · {{ company.name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ path('app_space_calendars') }}">← Calendriers</a>
+<h1 class="page-title">Nouveau calendrier</h1>
+<p class="page-lede">Il démarre ouvert du lundi au vendredi, de 9 h à 12 h et de 14 h à 18 h : vous ajusterez ses horaires juste après.</p>
+
+{{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+    {{ include('space/calendars/_settings_fields.html.twig') }}
+    <button type="submit" class="button button-primary">Créer le calendrier</button>
+{{ form_end(form) }}
+{% endblock %}

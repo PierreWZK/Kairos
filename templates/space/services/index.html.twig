@@ -1,0 +1,32 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = app.user.company %}
+
+{% block title %}Prestations · {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="space-head">
+    <div>
+        <h1 class="page-title">Prestations</h1>
+        <p class="page-lede">Le catalogue de l'entreprise. Chaque calendrier choisit ensuite celles qu'il propose.</p>
+    </div>
+    <a class="button button-primary" href="{{ path('app_space_service_new') }}">Nouvelle prestation</a>
+</div>
+
+{% if services is empty %}
+    <p class="empty">Aucune prestation pour le moment : ajoutez la première.</p>
+{% else %}
+    <ul class="row-list">
+        {% for service in services %}
+            <li>
+                <div>
+                    <a href="{{ path('app_space_service_edit', {id: service.id}) }}"><strong>{{ service.name }}</strong></a>
+                    {% if not service.active %}<span class="badge">Désactivée</span>{% endif %}
+                    <span class="page-meta">{{ service.durationMinutes|duration }} · {{ service.priceCents|price }}</span>
+                </div>
+                <a class="button button-ghost button-small" href="{{ path('app_space_service_edit', {id: service.id}) }}">Modifier</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

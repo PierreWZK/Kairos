@@ -1,0 +1,5 @@
+{# Le code d'intégration avec son bouton « Copier ». Variables : id, embed_url, page_url #}
+<div class="embed-code" id="{{ id }}">
+    {{ include('integration/_snippet.html.twig') }}
+</div>
+<button type="button" class="button button-primary button-small copy-button" data-copy="{{ id }}">Copier le code</button>

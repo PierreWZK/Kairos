@@ -1,52 +1,81 @@
-{% extends 'base.html.twig' %}
+{% extends 'space/_layout.html.twig' %}
 
 {% block title %}Mon espace · {{ company.name }}{% endblock %}
-{% block meta %}<meta name="robots" content="noindex">{% endblock %}
 
-{% block body_attributes %} class="branded" style="--brand: {{ company.accentColor }}"{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ user.companyRole.label }}</p>
+<h1 class="page-title">Bonjour {{ user.name }} !</h1>
 
-{% block body %}
-{{ include('_header.html.twig') }}
-
-<main class="page">
-    <div class="container">
-        {{ include('_flashes.html.twig') }}
-
-        <p class="eyebrow">{{ company.name }} · {{ user.companyRole.label }}</p>
-        <h1 class="page-title">Bonjour {{ user.name }} !</h1>
-        <p class="page-lede">Bienvenue dans l'espace de votre entreprise.</p>
-
-        {% if not user.verified %}
-            <div class="flash flash-warning verify-box" role="status">
-                <span>Confirmez votre adresse : un lien a été envoyé à <strong>{{ user.email }}</strong>. Vous pourrez ensuite ouvrir vos calendriers à la réservation.</span>
-                <form method="post" action="{{ path('app_resend_verification') }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('resend-verification') }}">
-                    <button type="submit" class="button button-ghost button-small">Renvoyer le lien</button>
-                </form>
-            </div>
-        {% endif %}
-
-        <div class="space-cards">
-            <section class="space-card">
-                <h2>Votre page de réservation</h2>
-                <p class="space-link">{{ url('app_company', {company: company.slug}) }}</p>
-                <a class="button button-ghost button-small" href="{{ path('app_company', {company: company.slug}) }}" target="_blank" rel="noopener">Voir ma page ↗</a>
-            </section>
-            <section class="space-card">
-                <h2>Calendriers</h2>
-                <p>
-                    {% set count = company.calendars|length %}
-                    {{ count ? count ~ ' calendrier' ~ (count > 1 ? 's') : 'Aucun calendrier pour le moment.' }}
-                    Leur configuration (horaires, fermetures, prestations) arrive ici très bientôt.
-                </p>
-            </section>
-            <section class="space-card">
-                <h2>Fuseau horaire</h2>
-                <p>{{ company.timezone }}</p>
-            </section>
-        </div>
+{% if not user.verified %}
+    <div class="flash flash-warning verify-box" role="status">
+        <span>Confirmez votre adresse : un lien a été envoyé à <strong>{{ user.email }}</strong>. Vous pourrez ensuite configurer vos calendriers et les ouvrir à la réservation.</span>
+        <form method="post" action="{{ path('app_resend_verification') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('resend-verification') }}">
+            <button type="submit" class="button button-ghost button-small">Renvoyer le lien</button>
+        </form>
     </div>
-</main>
+{% elseif calendars is empty and user.owner %}
+    <div class="space-card space-start">
+        <h2>Pour commencer</h2>
+        <ol>
+            <li><a href="{{ path('app_space_services') }}">Ajoutez vos prestations</a> : nom, durée, prix.</li>
+            <li><a href="{{ path('app_space_calendar_new') }}">Créez un calendrier</a> : une personne, une salle, un lieu…</li>
+            <li>Partagez votre lien ou intégrez le calendrier sur votre site.</li>
+        </ol>
+    </div>
+{% endif %}
 
-{{ include('_footer.html.twig') }}
+<div class="space-cards">
+    <section class="space-card">
+        <h2>Votre page de réservation</h2>
+        <p class="space-link">{{ url('app_company', {company: company.slug}) }}</p>
+        <a class="button button-ghost button-small" href="{{ path('app_company', {company: company.slug}) }}" target="_blank" rel="noopener">Voir ma page ↗</a>
+    </section>
+    <section class="space-card">
+        <h2>Calendriers</h2>
+        {% if calendars is empty %}
+            <p>Aucun calendrier pour le moment.</p>
+        {% else %}
+            <ul class="space-list">
+                {% for calendar in calendars %}
+                    <li>
+                        <a href="{{ path('app_space_calendar_edit', {id: calendar.id}) }}">{{ calendar.name }}</a>
+                        {{ include('space/calendars/_status.html.twig') }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if user.verified %}
+            <a class="button button-ghost button-small" href="{{ path('app_space_calendars') }}">Gérer les calendriers</a>
+        {% endif %}
+    </section>
+    <section class="space-card">
+        <h2>Prochains rendez-vous</h2>
+        {% if upcoming is empty %}
+            <p>Aucun rendez-vous à venir.</p>
+        {% else %}
+            <ul class="space-list">
+                {% for booking in upcoming %}
+                    <li>
+                        <strong>{{ booking.startsAt|format_date(pattern: 'EEE d MMM')|capitalize }} · {{ booking.startsAt|date('H:i') }}</strong>
+                        {{ booking.customerName }} — {{ booking.service.name }}{% if calendars|length > 1 %} ({{ booking.calendar.name }}){% endif %}
+                        {% if booking.status.value == 'pending' %}<span class="badge badge-warning">En attente</span>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+</div>
+
+{% if user.verified and calendars is not empty %}
+    <section class="space-section">
+        <h2 class="section-title">Intégrer toute l'entreprise sur votre site</h2>
+        <p class="page-meta">Vos clients choisissent d'abord le calendrier, puis la prestation. Pour un seul calendrier, voyez l'onglet « Intégration » de ce calendrier.</p>
+        {{ include('space/_embed_code.html.twig', {
+            id: 'embed-company',
+            embed_url: url('app_company_embed', {company: company.slug}),
+            page_url: url('app_company', {company: company.slug}),
+        }) }}
+    </section>
+{% endif %}
 {% endblock %}

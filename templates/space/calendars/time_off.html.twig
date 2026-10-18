@@ -1,0 +1,48 @@
+{% extends 'space/_layout.html.twig' %}
+
+{% set company = calendar.company %}
+
+{% block title %}{{ calendar.name }} · Fermetures{% endblock %}
+
+{% block content %}
+{{ include('space/calendars/_header.html.twig', {tab: 'time_off'}) }}
+
+<p class="page-meta">Congés, formation, jour férié… Pendant une fermeture, aucun créneau n'est proposé. Les rendez-vous déjà pris ne sont pas annulés.</p>
+
+<div class="space-columns">
+    <section>
+        <h2 class="section-title">En cours et à venir</h2>
+        {% if time_offs is empty %}
+            <p class="empty">Aucune fermeture prévue.</p>
+        {% else %}
+            <ul class="row-list">
+                {% for time_off in time_offs %}
+                    <li>
+                        <div>
+                            <strong>{{ time_off.reason ?? 'Fermeture' }}</strong>
+                            <span class="page-meta">
+                                Du {{ time_off.startsAt|format_datetime(pattern: 'EEE d MMM y, HH:mm') }}
+                                au {{ time_off.endsAt|format_datetime(pattern: 'EEE d MMM y, HH:mm') }}
+                            </span>
+                        </div>
+                        <form method="post" action="{{ path('app_space_calendar_time_off_delete', {id: calendar.id, timeOff: time_off.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-time-off-' ~ time_off.id) }}">
+                            <button type="submit" class="button button-ghost button-small">Supprimer</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2 class="section-title">Ajouter une fermeture</h2>
+        {{ form_start(form, {attr: {class: 'booking-form space-form', novalidate: 'novalidate'}}) }}
+            {{ form_row(form.startsAt) }}
+            {{ form_row(form.endsAt) }}
+            {{ form_row(form.reason) }}
+            <button type="submit" class="button button-primary">Ajouter</button>
+        {{ form_end(form) }}
+    </section>
+</div>
+{% endblock %}
