@@ -13,6 +13,8 @@
 
 <main class="page">
     <div class="container">
+        {{ include('_flashes.html.twig') }}
+
         {% if booking.cancelled %}
             <p class="eyebrow">Rendez-vous annulé</p>
             <h1 class="page-title">Ce rendez-vous a été annulé</h1>
@@ -20,7 +22,7 @@
         {% else %}
             <p class="eyebrow">C'est réservé</p>
             <h1 class="page-title">À bientôt, {{ booking.customerName }} !</h1>
-            <p class="page-lede">Votre rendez-vous est confirmé. Gardez cette page : son adresse permet de le retrouver.</p>
+            <p class="page-lede">Votre rendez-vous est confirmé. Un récapitulatif a été envoyé à {{ booking.customerEmail }}, avec un lien vers cette page.</p>
         {% endif %}
 
         <div class="checkout">
@@ -39,9 +41,22 @@
                     {% endif %}
                 </dl>
 
-                {% if not booking.cancelled %}
-                    <a class="button button-ghost" href="{{ path('app_booking_services') }}">Réserver un autre créneau</a>
+                {% if can_cancel %}
+                    <details class="cancel-box">
+                        <summary>Annuler ce rendez-vous</summary>
+                        <p>Le créneau sera libéré pour d'autres clients. Cette action est définitive.</p>
+                        <form method="post" action="{{ path('app_booking_cancel', {token: booking.cancelToken}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('cancel-booking') }}">
+                            <button type="submit" class="button button-danger">Oui, annuler le rendez-vous</button>
+                        </form>
+                    </details>
+                {% elseif not booking.cancelled and not is_past %}
+                    <p class="details-note">Le rendez-vous commence dans moins de {{ cancel_notice_hours }} h : il ne peut plus être annulé en ligne.</p>
+                {% elseif is_past and not booking.cancelled %}
+                    <p class="details-note">Ce rendez-vous est passé.</p>
                 {% endif %}
+
+                <a class="button button-ghost" href="{{ path('app_booking_services') }}">Réserver {{ booking.cancelled ? 'un nouveau' : 'un autre' }} créneau</a>
             </div>
         </div>
     </div>

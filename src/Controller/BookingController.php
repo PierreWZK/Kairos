@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\Booking;
 use App\Entity\Service;
 use App\Form\BookingType;
+use App\Notification\BookingMailer;
 use App\Repository\ServiceRepository;
 use App\Scheduling\BookingManager;
 use App\Scheduling\SlotFinder;
 use App\Scheduling\SlotUnavailableException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -59,6 +61,7 @@ final class BookingController extends AbstractController
         Request $request,
         SlotFinder $slotFinder,
         BookingManager $bookingManager,
+        BookingMailer $mailer,
         #[MapQueryParameter] string $debut = '',
     ): Response {
         $this->denyUnlessOffered($service);
@@ -88,6 +91,8 @@ final class BookingController extends AbstractController
                 return $this->backToAgenda($service, $start);
             }
 
+            $mailer->sendConfirmation($booking);
+
             return $this->redirectToRoute('app_booking_show', ['token' => $booking->getCancelToken()]);
         }
 
@@ -100,11 +105,38 @@ final class BookingController extends AbstractController
 
     /** La page du rendez-vous, connue du seul client : son adresse contient le jeton secret */
     #[Route('/rendez-vous/{token<[a-f0-9]{64}>}', name: 'app_booking_show', methods: ['GET'])]
-    public function show(#[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking): Response
-    {
+    public function show(
+        #[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking,
+        BookingManager $bookingManager,
+        ClockInterface $clock,
+    ): Response {
         return $this->render('booking/show.html.twig', [
             'booking' => $booking,
+            'can_cancel' => $bookingManager->canCancel($booking),
+            'cancel_notice_hours' => $bookingManager->getCancelNoticeHours(),
+            'is_past' => $booking->getEndsAt() <= $clock->now(),
         ]);
+    }
+
+    #[Route('/rendez-vous/{token<[a-f0-9]{64}>}/annuler', name: 'app_booking_cancel', methods: ['POST'])]
+    public function cancel(
+        #[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking,
+        Request $request,
+        BookingManager $bookingManager,
+        BookingMailer $mailer,
+    ): Response {
+        if (!$this->isCsrfTokenValid('cancel-booking', $request->getPayload()->getString('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        if ($bookingManager->cancel($booking)) {
+            $mailer->sendCancellation($booking);
+            $this->addFlash('success', 'Votre rendez-vous est annulé. Un e-mail de confirmation vous a été envoyé.');
+        } elseif (!$booking->isCancelled()) {
+            $this->addFlash('warning', sprintf('Ce rendez-vous commence dans moins de %d h : il ne peut plus être annulé en ligne.', $bookingManager->getCancelNoticeHours()));
+        }
+
+        return $this->redirectToRoute('app_booking_show', ['token' => $booking->getCancelToken()]);
     }
 
     private function denyUnlessOffered(Service $service): void

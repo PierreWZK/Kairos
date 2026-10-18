@@ -12,6 +12,7 @@
     --slot-free-ink: #0f5c56;
     --slot-taken: #ece6da;
     --slot-taken-ink: #a39b8c;
+    --danger: #b42318;
     --shadow: 0 1px 2px rgb(28 42 42 / 6%), 0 12px 32px -12px rgb(28 42 42 / 18%);
     --radius: 14px;
     --serif: 'Fraunces', Georgia, serif;
@@ -33,6 +34,7 @@
         --slot-free-ink: #8fd6cd;
         --slot-taken: #222d2d;
         --slot-taken-ink: #5f6d6b;
+        --danger: #f07a6a;
         --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -12px rgb(0 0 0 / 60%);
     }
 }
@@ -847,7 +849,7 @@ a.slot-free:focus-visible {
     margin: 0;
     padding: 0;
     list-style: none;
-    color: #b42318;
+    color: var(--danger);
     font-size: 0.85rem;
 }
 
@@ -882,6 +884,46 @@ a.slot-free:focus-visible {
 
 .details .button {
     justify-self: start;
+}
+
+.details-note {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.flash-success {
+    border-left-color: var(--primary);
+}
+
+.cancel-box {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.cancel-box summary {
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.cancel-box p {
+    margin: 0.75rem 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.button-danger {
+    border: 0;
+    background: var(--danger);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.button-danger:hover {
+    background: color-mix(in srgb, var(--danger) 85%, #000);
 }
 
 /* Pied de page */

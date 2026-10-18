@@ -4,6 +4,8 @@ namespace App\Scheduling;
 
 use App\Entity\Booking;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Lock\LockFactory;
 
 final class BookingManager
@@ -12,6 +14,9 @@ final class BookingManager
         private readonly SlotFinder $slotFinder,
         private readonly EntityManagerInterface $entityManager,
         private readonly LockFactory $lockFactory,
+        private readonly ClockInterface $clock,
+        #[Autowire(param: 'app.booking.cancel_notice_hours')]
+        private readonly int $cancelNoticeHours,
     ) {
     }
 
@@ -39,5 +44,34 @@ final class BookingManager
         } finally {
             $lock->release();
         }
+    }
+
+    /** Le client peut-il encore annuler lui-même ? Oui jusqu'à N heures avant le début. */
+    public function canCancel(Booking $booking): bool
+    {
+        return !$booking->isCancelled() && $booking->getStartsAt() > $this->cancelDeadline();
+    }
+
+    /** @return bool false si le rendez-vous ne peut plus être annulé en ligne */
+    public function cancel(Booking $booking): bool
+    {
+        if (!$this->canCancel($booking)) {
+            return false;
+        }
+
+        $booking->cancel();
+        $this->entityManager->flush();
+
+        return true;
+    }
+
+    public function getCancelNoticeHours(): int
+    {
+        return $this->cancelNoticeHours;
+    }
+
+    private function cancelDeadline(): \DateTimeImmutable
+    {
+        return $this->clock->now()->modify(sprintf('+%d hours', $this->cancelNoticeHours));
     }
 }

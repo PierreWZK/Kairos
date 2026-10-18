@@ -1,0 +1,10 @@
+{# Coordonnées du client, pour les e-mails du professionnel : variable attendue « booking » #}
+<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;">
+    <tr><td style="padding:2px 16px 2px 0; color:#5d6b69;">E-mail</td><td><a href="mailto:{{ booking.customerEmail }}" style="color:#0f5c56;">{{ booking.customerEmail }}</a></td></tr>
+    {% if booking.customerPhone %}
+        <tr><td style="padding:2px 16px 2px 0; color:#5d6b69;">Téléphone</td><td>{{ booking.customerPhone }}</td></tr>
+    {% endif %}
+    {% if booking.note %}
+        <tr><td style="padding:2px 16px 2px 0; color:#5d6b69; vertical-align:top;">Note</td><td>{{ booking.note|nl2br }}</td></tr>
+    {% endif %}
+</table>

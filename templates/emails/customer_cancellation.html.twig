@@ -1,0 +1,14 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <p style="margin:0;">Bonjour {{ booking.customerName }},</p>
+    <p>Votre rendez-vous a bien été annulé :</p>
+
+    {{ include('emails/_booking_card.html.twig') }}
+
+    <p>Le créneau est de nouveau proposé aux autres clients. Si vous souhaitez reprendre rendez-vous :</p>
+    <p style="margin:24px 0;">
+        <a href="{{ url('app_booking_services') }}" style="display:inline-block; padding:12px 20px; background:#0f5c56; border-radius:999px; color:#f6f1e7; font-weight:bold; text-decoration:none;">Réserver un nouveau créneau</a>
+    </p>
+    <p style="margin-bottom:0;">À bientôt !</p>
+{% endblock %}

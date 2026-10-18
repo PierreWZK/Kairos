@@ -1,0 +1,11 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <p style="margin:0;"><strong>{{ booking.customerName }}</strong> a annulé son rendez-vous :</p>
+
+    {{ include('emails/_booking_card.html.twig') }}
+
+    {{ include('emails/_customer_details.html.twig') }}
+
+    <p style="margin-bottom:0;">Le créneau est de nouveau proposé à la réservation.</p>
+{% endblock %}

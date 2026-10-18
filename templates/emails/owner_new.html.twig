@@ -1,0 +1,11 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <p style="margin:0;"><strong>{{ booking.customerName }}</strong> vient de réserver :</p>
+
+    {{ include('emails/_booking_card.html.twig') }}
+
+    {{ include('emails/_customer_details.html.twig') }}
+
+    <p style="margin-bottom:0; font-size:13px; color:#5d6b69;">Répondez à cet e-mail pour écrire directement au client.</p>
+{% endblock %}
