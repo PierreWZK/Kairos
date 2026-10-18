@@ -2,18 +2,23 @@
 
 namespace App\Controller;
 
+use App\Entity\Booking;
 use App\Entity\Service;
+use App\Form\BookingType;
 use App\Repository\ServiceRepository;
+use App\Scheduling\BookingManager;
 use App\Scheduling\SlotFinder;
+use App\Scheduling\SlotUnavailableException;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/reserver')]
 final class BookingController extends AbstractController
 {
-    #[Route('', name: 'app_booking_services', methods: ['GET'])]
+    #[Route('/reserver', name: 'app_booking_services', methods: ['GET'])]
     public function services(ServiceRepository $services): Response
     {
         return $this->render('booking/services.html.twig', [
@@ -21,12 +26,10 @@ final class BookingController extends AbstractController
         ]);
     }
 
-    #[Route('/{id<\d+>}', name: 'app_booking_agenda', methods: ['GET'])]
+    #[Route('/reserver/{id<\d+>}', name: 'app_booking_agenda', methods: ['GET'])]
     public function agenda(Service $service, SlotFinder $slotFinder, #[MapQueryParameter] ?string $semaine = null): Response
     {
-        if (!$service->isActive()) {
-            throw $this->createNotFoundException('Cette prestation n\'est pas proposée.');
-        }
+        $this->denyUnlessOffered($service);
 
         $firstWeek = $slotFinder->firstWeek();
         $lastWeek = $slotFinder->lastWeek();
@@ -47,6 +50,77 @@ final class BookingController extends AbstractController
             'days' => $slotFinder->week($service, $week),
             'previous_week' => $previous >= $firstWeek ? $previous : null,
             'next_week' => $next <= $lastWeek ? $next : null,
+        ]);
+    }
+
+    #[Route('/reserver/{id<\d+>}/creneau', name: 'app_booking_new', methods: ['GET', 'POST'])]
+    public function new(
+        Service $service,
+        Request $request,
+        SlotFinder $slotFinder,
+        BookingManager $bookingManager,
+        #[MapQueryParameter] string $debut = '',
+    ): Response {
+        $this->denyUnlessOffered($service);
+
+        // ?debut=2026-10-19T10:00
+        $start = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $debut);
+        if (false === $start) {
+            return $this->redirectToRoute('app_booking_agenda', ['id' => $service->getId()]);
+        }
+
+        if (!$slotFinder->isFree($service, $start)) {
+            return $this->backToAgenda($service, $start);
+        }
+
+        $booking = (new Booking())
+            ->setService($service)
+            ->setStartsAt($start);
+
+        $form = $this->createForm(BookingType::class, $booking);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                // Revérifie le créneau sous verrou : il a pu être pris pendant que le client remplissait le formulaire
+                $bookingManager->book($booking);
+            } catch (SlotUnavailableException) {
+                return $this->backToAgenda($service, $start);
+            }
+
+            return $this->redirectToRoute('app_booking_show', ['token' => $booking->getCancelToken()]);
+        }
+
+        return $this->render('booking/new.html.twig', [
+            'service' => $service,
+            'booking' => $booking,
+            'form' => $form,
+        ]);
+    }
+
+    /** La page du rendez-vous, connue du seul client : son adresse contient le jeton secret */
+    #[Route('/rendez-vous/{token<[a-f0-9]{64}>}', name: 'app_booking_show', methods: ['GET'])]
+    public function show(#[MapEntity(mapping: ['token' => 'cancelToken'])] Booking $booking): Response
+    {
+        return $this->render('booking/show.html.twig', [
+            'booking' => $booking,
+        ]);
+    }
+
+    private function denyUnlessOffered(Service $service): void
+    {
+        if (!$service->isActive()) {
+            throw $this->createNotFoundException('Cette prestation n\'est pas proposée.');
+        }
+    }
+
+    private function backToAgenda(Service $service, \DateTimeImmutable $start): Response
+    {
+        $this->addFlash('warning', 'Ce créneau n\'est plus disponible. Choisissez-en un autre.');
+
+        return $this->redirectToRoute('app_booking_agenda', [
+            'id' => $service->getId(),
+            'semaine' => $start->format('Y-m-d'),
         ]);
     }
 }

@@ -1,0 +1,10 @@
+{# Récapitulatif d'un rendez-vous : variable attendue « booking » #}
+<aside class="summary{{ booking.cancelled ? ' is-cancelled' }}" aria-label="Récapitulatif du rendez-vous">
+    <p class="summary-service">{{ booking.service.name }}</p>
+    <p class="summary-date">{{ booking.startsAt|format_date(pattern: 'EEEE d MMMM y')|capitalize }}</p>
+    <p class="summary-time">{{ booking.startsAt|date('H:i') }} → {{ booking.endsAt|date('H:i') }}</p>
+    <dl class="summary-meta">
+        <div><dt>Durée</dt><dd>{{ booking.service.durationMinutes|duration }}</dd></div>
+        <div><dt>Prix</dt><dd>{{ booking.service.priceCents|price }}</dd></div>
+    </dl>
+</aside>

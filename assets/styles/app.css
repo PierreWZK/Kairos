@@ -681,6 +681,17 @@ a.planner-nav:hover {
     text-align: center;
 }
 
+a.slot-free {
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+a.slot-free:hover,
+a.slot-free:focus-visible {
+    background: var(--primary);
+    color: var(--primary-ink);
+}
+
 .slot-unavailable {
     background: transparent;
     color: var(--slot-taken-ink);
@@ -700,6 +711,177 @@ a.planner-nav:hover {
     border-top: 1px solid var(--line);
     color: var(--muted);
     font-size: 0.8rem;
+}
+
+.flash {
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--primary);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.flash-warning {
+    border-left-color: var(--accent);
+}
+
+/* Réservation : récapitulatif + formulaire */
+
+.checkout {
+    display: grid;
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+    margin-top: 2.5rem;
+}
+
+.summary {
+    position: sticky;
+    top: 88px;
+    padding: 1.5rem;
+    background: var(--primary);
+    border-radius: var(--radius);
+    color: var(--primary-ink);
+}
+
+.summary.is-cancelled {
+    background: var(--slot-taken);
+    color: var(--muted);
+}
+
+.summary.is-cancelled .summary-date,
+.summary.is-cancelled .summary-time {
+    text-decoration: line-through;
+}
+
+.summary-service {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.summary-date {
+    margin-top: 0.75rem;
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.summary-time {
+    margin-top: 0.25rem;
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-meta {
+    display: flex;
+    gap: 2rem;
+    margin: 1.25rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.summary-meta dt {
+    font-size: 0.75rem;
+    opacity: 0.75;
+}
+
+.summary-meta dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.booking-form,
+.details {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.booking-form > div {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.booking-form label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.optional {
+    margin-left: 0.3rem;
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.booking-form input,
+.booking-form textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+}
+
+.booking-form input:focus,
+.booking-form textarea:focus {
+    border-color: var(--primary);
+    outline: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.booking-form .help-text {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.booking-form ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #b42318;
+    font-size: 0.85rem;
+}
+
+.booking-form button {
+    justify-self: start;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.details-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+}
+
+.details-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.details-list dt {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.details-list dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.details .button {
+    justify-self: start;
 }
 
 /* Pied de page */
@@ -739,6 +921,14 @@ a.planner-nav:hover {
     .sides,
     .rules {
         grid-template-columns: 1fr;
+    }
+
+    .checkout {
+        grid-template-columns: 1fr;
+    }
+
+    .summary {
+        position: static;
     }
 
     /* L'agenda passe en liste : un jour par ligne, ses créneaux à la suite */

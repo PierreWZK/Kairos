@@ -13,6 +13,8 @@
         <h1 class="page-title">{{ service.name }}</h1>
         <p class="page-lede">{{ service.durationMinutes|duration }} · {{ service.priceCents|price }} — choisissez un créneau libre.</p>
 
+        {{ include('_flashes.html.twig') }}
+
         <section class="planner" aria-labelledby="planner-week">
             <div class="planner-head">
                 {% if previous_week %}
@@ -46,8 +48,13 @@
                             <ul class="planner-slots">
                                 {% for slot in day.slots %}
                                     <li>
-                                        <span class="slot slot-{{ slot.status.value }}"
-                                              title="{{ slot.start|date('H:i') }} → {{ slot.end|date('H:i') }}">{{ slot.start|date('H:i') }}</span>
+                                        {% if slot.free %}
+                                            <a class="slot slot-free"
+                                               href="{{ path('app_booking_new', {id: service.id, debut: slot.start|date('Y-m-d\\TH:i')}) }}"
+                                               title="Réserver de {{ slot.start|date('H:i') }} à {{ slot.end|date('H:i') }}">{{ slot.start|date('H:i') }}</a>
+                                        {% else %}
+                                            <span class="slot slot-{{ slot.status.value }}">{{ slot.start|date('H:i') }}</span>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Votre rendez-vous · Kairos{% endblock %}
+
+{# Page privée : son adresse contient le jeton d'annulation, elle ne doit ni être indexée ni fuiter par le Referer #}
+{% block meta %}
+    <meta name="robots" content="noindex">
+    <meta name="referrer" content="no-referrer">
+{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        {% if booking.cancelled %}
+            <p class="eyebrow">Rendez-vous annulé</p>
+            <h1 class="page-title">Ce rendez-vous a été annulé</h1>
+            <p class="page-lede">Annulé le {{ booking.cancelledAt|format_date(pattern: 'd MMMM y') }}. Le créneau est de nouveau proposé aux autres clients.</p>
+        {% else %}
+            <p class="eyebrow">C'est réservé</p>
+            <h1 class="page-title">À bientôt, {{ booking.customerName }} !</h1>
+            <p class="page-lede">Votre rendez-vous est confirmé. Gardez cette page : son adresse permet de le retrouver.</p>
+        {% endif %}
+
+        <div class="checkout">
+            {{ include('booking/_summary.html.twig') }}
+
+            <div class="details">
+                <h2 class="details-title">Vos coordonnées</h2>
+                <dl class="details-list">
+                    <div><dt>Nom</dt><dd>{{ booking.customerName }}</dd></div>
+                    <div><dt>E-mail</dt><dd>{{ booking.customerEmail }}</dd></div>
+                    {% if booking.customerPhone %}
+                        <div><dt>Téléphone</dt><dd>{{ booking.customerPhone }}</dd></div>
+                    {% endif %}
+                    {% if booking.note %}
+                        <div><dt>Note</dt><dd>{{ booking.note|nl2br }}</dd></div>
+                    {% endif %}
+                </dl>
+
+                {% if not booking.cancelled %}
+                    <a class="button button-ghost" href="{{ path('app_booking_services') }}">Réserver un autre créneau</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}
