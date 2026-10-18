@@ -1,0 +1,32 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Connexion · Kairos{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Espace entreprise</p>
+<h1 class="page-title">Connexion</h1>
+<p class="page-lede">Retrouvez vos calendriers, vos prestations et vos rendez-vous.</p>
+
+<form method="post" action="{{ path('app_login') }}" class="booking-form" novalidate>
+    {% if error %}
+        <p class="flash flash-danger" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+    {% endif %}
+
+    <div>
+        <label for="username">Adresse e-mail</label>
+        <input type="email" id="username" name="_username" value="{{ last_username }}" autocomplete="email" required autofocus>
+    </div>
+    <div>
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="_password" autocomplete="current-password" required>
+    </div>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <button type="submit" class="button button-primary">Se connecter</button>
+</form>
+
+<div class="auth-links">
+    <a href="{{ path('app_forgot_password') }}">Mot de passe oublié ?</a>
+    <span>Pas encore de compte ? <a href="{{ path('app_register') }}">Créer mon espace</a></span>
+</div>
+{% endblock %}

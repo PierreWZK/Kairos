@@ -851,6 +851,7 @@ a.slot-free:focus-visible {
 }
 
 .booking-form input,
+.booking-form select,
 .booking-form textarea {
     width: 100%;
     padding: 0.7rem 0.85rem;
@@ -862,6 +863,7 @@ a.slot-free:focus-visible {
 }
 
 .booking-form input:focus,
+.booking-form select:focus,
 .booking-form textarea:focus {
     border-color: var(--primary);
     outline: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
@@ -1349,6 +1351,147 @@ a.slot-free:focus-visible {
     font-family: var(--sans);
 }
 
+/* Comptes : connexion, inscription, mot de passe */
+
+.auth {
+    width: min(480px, 100%);
+    margin-inline: auto;
+}
+
+.auth-wide {
+    width: min(640px, 100%);
+}
+
+.auth .booking-form {
+    margin-top: 2rem;
+}
+
+.auth .booking-form button {
+    justify-self: stretch;
+    justify-content: center;
+}
+
+.form-group-title {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.form-group-title:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.slug-preview {
+    color: var(--muted);
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
+.slug-preview strong {
+    color: var(--primary);
+}
+
+.auth-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-top: 1.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.auth-links a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.flash-danger {
+    border-left-color: var(--danger);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.header-link {
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.header-link:hover {
+    color: var(--ink);
+}
+
+/* Espace entreprise */
+
+.space-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+
+.space-card {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.space-card h2 {
+    margin-bottom: 0.5rem;
+    font-family: var(--sans);
+    font-size: 1rem;
+}
+
+.space-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.space-card .button {
+    margin-top: 1rem;
+}
+
+.space-link {
+    font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.verify-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.verify-box form {
+    margin: 0;
+}
+
+.verify-box button {
+    border: 1px solid var(--line);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -1413,7 +1556,8 @@ a.slot-free:focus-visible {
 
 @media (max-width: 600px) {
     .nav,
-    .company-header-note {
+    .company-header-note,
+    .header-link {
         display: none;
     }
 

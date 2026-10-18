@@ -1,0 +1,16 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Lien expiré · Kairos{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Vérification de l'adresse</p>
+<h1 class="page-title">Ce lien ne fonctionne plus</h1>
+<p class="page-lede">
+    Il a expiré (il est valable 48 heures), ou il est incomplet.
+    {% if app.user %}Demandez-en un nouveau depuis votre espace.{% else %}Connectez-vous pour en recevoir un nouveau.{% endif %}
+</p>
+
+<div class="hero-actions">
+    <a class="button button-primary" href="{{ path(app.user ? 'app_space' : 'app_login') }}">{{ app.user ? 'Aller à mon espace' : 'Se connecter' }}</a>
+</div>
+{% endblock %}

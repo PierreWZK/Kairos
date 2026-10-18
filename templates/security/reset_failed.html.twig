@@ -1,0 +1,13 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Lien expiré · Kairos{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Mot de passe oublié</p>
+<h1 class="page-title">Ce lien ne fonctionne plus</h1>
+<p class="page-lede">Il a expiré (il est valable une heure), il a déjà servi, ou il est incomplet. Demandez-en un nouveau.</p>
+
+<div class="hero-actions">
+    <a class="button button-primary" href="{{ path('app_forgot_password') }}">Recevoir un nouveau lien</a>
+</div>
+{% endblock %}

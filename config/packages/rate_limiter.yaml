@@ -1,0 +1,14 @@
+# Limites contre les abus des formulaires qui envoient un e-mail
+framework:
+    rate_limiter:
+        # Mot de passe oublié : 3 demandes par quart d'heure, par adresse e-mail et par IP
+        password_reset:
+            policy: sliding_window
+            limit: 3
+            interval: '15 minutes'
+        # Renvoi du lien de vérification : 3 par quart d'heure et par compte
+        verification_email:
+            policy: sliding_window
+            limit: 3
+            interval: '15 minutes'
+

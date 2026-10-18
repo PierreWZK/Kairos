@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon espace · {{ company.name }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block body_attributes %} class="branded" style="--brand: {{ company.accentColor }}"{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        {{ include('_flashes.html.twig') }}
+
+        <p class="eyebrow">{{ company.name }} · {{ user.companyRole.label }}</p>
+        <h1 class="page-title">Bonjour {{ user.name }} !</h1>
+        <p class="page-lede">Bienvenue dans l'espace de votre entreprise.</p>
+
+        {% if not user.verified %}
+            <div class="flash flash-warning verify-box" role="status">
+                <span>Confirmez votre adresse : un lien a été envoyé à <strong>{{ user.email }}</strong>. Vous pourrez ensuite ouvrir vos calendriers à la réservation.</span>
+                <form method="post" action="{{ path('app_resend_verification') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('resend-verification') }}">
+                    <button type="submit" class="button button-ghost button-small">Renvoyer le lien</button>
+                </form>
+            </div>
+        {% endif %}
+
+        <div class="space-cards">
+            <section class="space-card">
+                <h2>Votre page de réservation</h2>
+                <p class="space-link">{{ url('app_company', {company: company.slug}) }}</p>
+                <a class="button button-ghost button-small" href="{{ path('app_company', {company: company.slug}) }}" target="_blank" rel="noopener">Voir ma page ↗</a>
+            </section>
+            <section class="space-card">
+                <h2>Calendriers</h2>
+                <p>
+                    {% set count = company.calendars|length %}
+                    {{ count ? count ~ ' calendrier' ~ (count > 1 ? 's') : 'Aucun calendrier pour le moment.' }}
+                    Leur configuration (horaires, fermetures, prestations) arrive ici très bientôt.
+                </p>
+            </section>
+            <section class="space-card">
+                <h2>Fuseau horaire</h2>
+                <p>{{ company.timezone }}</p>
+            </section>
+        </div>
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}

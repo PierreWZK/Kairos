@@ -9,24 +9,17 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class SecurityController extends AbstractController
 {
+    /** Une seule page de connexion : les entreprises arrivent dans leur espace, le super-admin dans EasyAdmin */
     #[Route('/connexion', name: 'app_login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
-            return $this->redirectToRoute('admin');
+        if (null !== $this->getUser()) {
+            return $this->redirectToRoute('app_space');
         }
 
-        // La page de connexion d'EasyAdmin, pour rester dans le style du back-office
-        return $this->render('@EasyAdmin/page/login.html.twig', [
+        return $this->render('security/login.html.twig', [
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
-            'translation_domain' => 'admin',
-            'page_title' => 'Kairos · Espace professionnel',
-            'csrf_token_intention' => 'authenticate',
-            'target_path' => $this->generateUrl('admin'),
-            'username_label' => 'E-mail',
-            'password_label' => 'Mot de passe',
-            'sign_in_label' => 'Se connecter',
         ]);
     }
 

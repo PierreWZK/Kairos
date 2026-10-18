@@ -10,6 +10,14 @@
             <a href="{{ path('app_home') }}#integration">Intégration</a>
             <a href="{{ path('app_home') }}#demos">Démos</a>
         </nav>
-        <a class="button button-primary button-small" href="{{ path('app_home') }}#demos">Voir les démos</a>
+        <div class="header-actions">
+            {% if app.user %}
+                <a class="header-link" href="{{ path('app_logout') }}">Déconnexion</a>
+                <a class="button button-primary button-small" href="{{ path('app_space') }}">Mon espace</a>
+            {% else %}
+                <a class="header-link" href="{{ path('app_login') }}">Se connecter</a>
+                <a class="button button-primary button-small" href="{{ path('app_register') }}">Créer mon espace</a>
+            {% endif %}
+        </div>
     </div>
 </header>

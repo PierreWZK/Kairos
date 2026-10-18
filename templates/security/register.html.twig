@@ -1,0 +1,68 @@
+{% extends 'security/_layout.html.twig' %}
+
+{% block title %}Créer mon espace · Kairos{% endblock %}
+{% block auth_class %} auth-wide{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Inscription gratuite</p>
+<h1 class="page-title">Créez l'espace de votre entreprise</h1>
+<p class="page-lede">Deux minutes suffisent. Vous configurerez ensuite vos calendriers et vos prestations.</p>
+
+{{ form_start(form, {attr: {class: 'booking-form', novalidate: 'novalidate'}}) }}
+    {% if form.vars.errors|length %}
+        <div class="flash flash-warning">{{ form_errors(form) }}</div>
+    {% endif %}
+
+    <p class="form-group-title">Votre entreprise</p>
+    {{ form_row(form.companyName) }}
+    <div>
+        {{ form_label(form.companySlug) }}
+        {{ form_widget(form.companySlug) }}
+        <p class="slug-preview">{{ url('app_home') }}<strong data-slug-preview>{{ form.companySlug.vars.value ?: 'votre-entreprise' }}</strong></p>
+        {{ form_help(form.companySlug) }}
+        {{ form_errors(form.companySlug) }}
+    </div>
+    {{ form_row(form.timezone) }}
+
+    <p class="form-group-title">Vous</p>
+    {{ form_row(form.name) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.plainPassword) }}
+
+    <button type="submit" class="button button-primary">Créer mon espace</button>
+{{ form_end(form) }}
+
+<div class="auth-links">
+    <span>Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a></span>
+</div>
+
+<script>
+    // Propose le lien à partir du nom, tant que le lien n'a pas été modifié à la main
+    (function () {
+        var source = document.querySelector('[data-slug-source]');
+        var target = document.querySelector('[data-slug-target]');
+        var preview = document.querySelector('[data-slug-preview]');
+        if (!source || !target) {
+            return;
+        }
+        var touched = target.value !== '';
+        var slugify = function (text) {
+            return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+        };
+        var show = function () {
+            preview.textContent = target.value || 'votre-entreprise';
+        };
+        source.addEventListener('input', function () {
+            if (!touched) {
+                target.value = slugify(source.value);
+                show();
+            }
+        });
+        target.addEventListener('input', function () {
+            touched = target.value !== '';
+            show();
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{# Mise en page des pages de compte : une colonne étroite sous l'en-tête Kairos #}
+{% extends 'base.html.twig' %}
+
+{% block meta %}
+    <meta name="robots" content="noindex">
+{% endblock %}
+
+{% block body %}
+{{ include('_header.html.twig') }}
+
+<main class="page">
+    <div class="container">
+        <div class="auth{% block auth_class %}{% endblock %}">
+            {{ include('_flashes.html.twig') }}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</main>
+
+{{ include('_footer.html.twig') }}
+{% endblock %}

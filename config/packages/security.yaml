@@ -3,6 +3,10 @@ security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
+    # Le propriétaire a tous les droits d'un membre
+    role_hierarchy:
+        ROLE_COMPANY_OWNER: ROLE_COMPANY_MEMBER
+
     providers:
         app_user_provider:
             entity:
@@ -17,11 +21,14 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            # Refuse la connexion des entreprises suspendues
+            user_checker: App\Security\UserChecker
             form_login:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-                default_target_path: admin
+                # L'espace entreprise ; le super-admin y est renvoyé vers EasyAdmin
+                default_target_path: app_space
             # 5 essais par minute et par identifiant/adresse IP, contre la force brute
             login_throttling:
                 max_attempts: 5
@@ -33,6 +40,8 @@ security:
     access_control:
         # EasyAdmin : réservé au super-admin de la plateforme
         - { path: ^/admin, roles: ROLE_SUPER_ADMIN }
+        # Espace entreprise : connecté (les contrôleurs vérifient l'entreprise et le rôle)
+        - { path: ^/espace, roles: IS_AUTHENTICATED }
 
 when@test:
     security:
