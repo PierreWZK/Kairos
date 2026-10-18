@@ -7,6 +7,14 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # Fuseau horaire de l'agenda : toutes les dates de l'appli sont exprimées dans ce fuseau
+    app.timezone: 'Europe/Paris'
+    # Un créneau peut commencer toutes les N minutes
+    app.booking.slot_step_minutes: 30
+    # Délai minimum entre maintenant et le début d'un rendez-vous
+    app.booking.min_notice_hours: 2
+    # Jusqu'où l'agenda est ouvert à la réservation
+    app.booking.horizon_weeks: 4
 
 services:
     # default configuration for services in *this* file
