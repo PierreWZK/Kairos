@@ -870,6 +870,52 @@ a.slot-free:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
+/* Champ mot de passe et son bouton « œil » (assets/js/forms.js) */
+.password-field {
+    position: relative;
+    display: block;
+}
+
+.booking-form .password-field input {
+    padding-right: 3rem;
+}
+
+/* Edge ajoute son propre œil : un seul suffit */
+.password-field input::-ms-reveal {
+    display: none;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.35rem;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.password-toggle:hover {
+    color: var(--ink);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    color: var(--ink);
+}
+
+.password-toggle:disabled {
+    display: none;
+}
+
 .booking-form .help-text {
     color: var(--muted);
     font-size: 0.85rem;
