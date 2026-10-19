@@ -5,6 +5,18 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Kairos{% endblock %}</title>
         <meta name="description" content="{% block description %}Kairos, la réservation de créneaux en ligne : le client choisit son moment, le professionnel garde la main sur son agenda.{% endblock %}">
+        {# Aperçu du lien quand on le partage (Open Graph, Twitter). Pas d'og:url : certaines adresses contiennent un jeton #}
+        <meta name="theme-color" content="#0f5c56">
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="fr_FR">
+        <meta property="og:site_name" content="Kairos">
+        <meta property="og:title" content="{{ block('title') }}">
+        <meta property="og:description" content="{{ block('description') }}">
+        <meta property="og:image" content="{{ absolute_url('/og.png') }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Kairos · aperçu du site">
+        <meta name="twitter:card" content="summary_large_image">
         {% block meta %}{% endblock %}
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230f5c56%22/><circle cx=%2216%22 cy=%2216%22 r=%229%22 fill=%22none%22 stroke=%22%23f4ede1%22 stroke-width=%222.5%22/><path d=%22M16 10v6l4 3%22 fill=%22none%22 stroke=%22%23e9a23b%22 stroke-width=%222.5%22 stroke-linecap=%22round%22/></svg>">
         <link rel="preconnect" href="https://fonts.googleapis.com">

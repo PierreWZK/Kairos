@@ -10,6 +10,8 @@ Le nom vient du grec ancien *kairos*, « le moment opportun », par opposition �
 
 🔗 **Code :** [github.com/PierreWZK/Kairos](https://github.com/PierreWZK/Kairos)
 
+📄 Ce qui a été construit, règle par règle : le [cahier des charges](CAHIER_DES_CHARGES.md).
+
 **Essayer sans s'inscrire** : réservez sur [Salon Lumière](https://kairos.projectp.fr/salon-lumiere), ou connectez-vous à son espace avec `julie@salon-lumiere.test` / `kairos-demo` (propriétaire) ou `marc@salon-lumiere.test` / `kairos-demo` (membre). La démo est remise à zéro chaque nuit.
 
 ## Trois espaces

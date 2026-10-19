@@ -7,7 +7,6 @@ use App\Entity\Company;
 use App\Entity\User;
 use App\Enum\CompanyRole;
 use App\Repository\CalendarRepository;
-use App\Repository\CompanyRepository;
 use App\Repository\ServiceRepository;
 use App\Repository\TimeOffRepository;
 use App\Tests\AgendaTestTrait;

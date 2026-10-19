@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\CompanyRole;
 use App\Repository\CompanyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -311,11 +310,5 @@ class Company
     public function getUsers(): Collection
     {
         return $this->users;
-    }
-
-    /** @return list<User> */
-    public function getOwners(): array
-    {
-        return array_values($this->users->filter(static fn (User $user): bool => CompanyRole::Owner === $user->getCompanyRole())->toArray());
     }
 }
