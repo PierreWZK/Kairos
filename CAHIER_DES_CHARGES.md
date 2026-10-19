@@ -89,7 +89,7 @@ PHPUnit, heure figée au lundi 19 octobre 2026 à 08:00 (Paris) : unitaires (cr�
 
 ### Mise en ligne
 
-À chaque push sur `main`, GitHub Actions lance les tests et construit l'image Docker ; si tout passe, un webhook demande à Coolify de redéployer. Au démarrage, le conteneur lance les migrations. L'aperçu du lien vient des balises Open Graph et de `public/og.png`.
+À chaque push sur `main`, Coolify reconstruit l'image et redéploie ; en parallèle, GitHub Actions lance les tests et construit l'image Docker (aussi sur les pull requests). Au démarrage, le conteneur lance les migrations. L'aperçu du lien vient des balises Open Graph et de `public/og.png`.
 
 ## 5. Critères de réussite
 

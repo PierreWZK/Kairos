@@ -153,10 +153,8 @@ php bin/phpunit
 Kairos tourne sur un VPS géré avec **[Coolify](https://coolify.io)** : **https://kairos.projectp.fr**.
 
 ```
-git push (main) ──► GitHub Actions : tests + construction de l'image Docker
-                                         │ tout passe
-                                         ▼
-                    webhook Coolify ──► nouvelle image ──► migrations ──► site à jour
+git push (main) ──► Coolify : nouvelle image ──► migrations ──► site à jour
+                └─► GitHub Actions : tests + construction de l'image Docker
 ```
 
 L'image (`Dockerfile`) repose sur **FrankenPHP** (Caddy + PHP 8.4) ; Coolify (Traefik) s'occupe du HTTPS. Au démarrage, `docker/entrypoint.sh` attend MySQL, lance les migrations et prépare le cache.
@@ -171,7 +169,7 @@ Dans le projet Coolify : **+ New → Database → MySQL** (version 8.4). Notez l
 
 - **Domaine** : `https://kairos.projectp.fr` (avec un enregistrement DNS `A` de `kairos` vers l'IP du VPS).
 - **Healthcheck** : chemin `/`, port 80.
-- **Déploiement automatique** : désactivé (c'est GitHub Actions qui le déclenche, après les tests).
+- **Déploiement automatique** : activé, à chaque push sur `main`.
 - **Stockage persistant** (*Persistent Storage*) : deux volumes.
 
 | Volume | Chemin dans le conteneur | Contenu |
@@ -206,20 +204,14 @@ Puis, dans **Scheduled Tasks**, une tâche quotidienne qui remet la démo à zé
 | --- | --- | --- |
 | `demo-reset` | `php bin/console app:demo:reset` | `0 4 * * *` (chaque nuit à 4 h) |
 
-### 4. Déploiement continu
+### 4. Intégration continue
 
-Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) :
+Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml), à chaque push et pull request :
 
-1. **Tests**, à chaque push et pull request : PHP 8.4 et MySQL 8.4, vérification du conteneur, des templates et du schéma de la base, puis PHPUnit.
-2. **Image Docker** : l'image de production est construite, pour qu'une erreur du `Dockerfile` se voie avant le déploiement.
-3. **Déploiement** (uniquement sur `main`, et seulement si tout passe) : le webhook de Coolify reconstruit et remplace le conteneur ; le workflow attend ensuite que la page d'accueil réponde.
+1. **Tests** : PHP 8.4 et MySQL 8.4, vérification du conteneur, des templates et du schéma de la base, puis PHPUnit.
+2. **Image Docker** : l'image de production est construite, pour qu'une erreur du `Dockerfile` se voie dans la pull request.
 
-| Secret du dépôt (*Settings → Secrets and variables → Actions*) | Valeur |
-| --- | --- |
-| `COOLIFY_WEBHOOK` | URL **Deploy Webhook** de l'application (onglet *Webhooks*) |
-| `COOLIFY_TOKEN` | jeton d'API Coolify (*Keys & Tokens → API tokens*, droit *deploy*) |
-
-Le bouton **Actions → CI / CD → Run workflow** permet aussi de redéployer à la main.
+Le déploiement, lui, est fait par Coolify à chaque push sur `main` ; le bouton **Redeploy** de Coolify relance un déploiement à la main.
 
 ### Bon à savoir
 

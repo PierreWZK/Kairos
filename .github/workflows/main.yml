@@ -1,16 +1,11 @@
 # ---------------------------------------------------------------------------
-# Kairos · intégration et déploiement continus
+# Kairos · intégration continue
 #
-# CI : à chaque push et pull request, les tests tournent sur PHP 8.4 + MySQL 8.4,
-#      et l'image Docker de production est construite (sans être publiée).
-# CD : sur main uniquement, et seulement si tout passe, Coolify redéploie le site
-#      (son déploiement automatique sur push est désactivé : c'est ce workflow qui le déclenche).
-#
-# Réglages du dépôt (Settings → Secrets and variables → Actions) :
-#   secrets   COOLIFY_WEBHOOK   URL « Deploy Webhook » de l'application (Coolify → Webhooks)
-#             COOLIFY_TOKEN     jeton d'API Coolify (Keys & Tokens → API tokens, droit « deploy »)
+# À chaque push et pull request : les tests tournent sur PHP 8.4 + MySQL 8.4,
+# et l'image Docker de production est construite (sans être publiée).
+# Le déploiement est fait par Coolify à chaque push sur main.
 # ---------------------------------------------------------------------------
-name: CI / CD
+name: CI
 
 on:
   push:
@@ -87,36 +82,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    name: Déploiement sur Coolify
-    needs: [tests, image]
-    # Uniquement main (push ou bouton manuel), jamais pour une pull request
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://kairos.projectp.fr
-    # Un seul déploiement à la fois ; un nouveau push attend la fin du précédent
-    concurrency:
-      group: production
-      cancel-in-progress: false
-
-    steps:
-      - name: Déclenchement du déploiement
-        env:
-          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
-          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
-        run: |
-          curl --fail-with-body -sS -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK"
-
-      # Coolify construit l'image puis remplace le conteneur : on attend que le site réponde (10 minutes au plus)
-      - name: Vérification du site
-        run: |
-          sleep 60
-          for i in $(seq 1 54); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://kairos.projectp.fr/ || true)
-            echo "Page d'accueil : HTTP $code"
-            [ "$code" = "200" ] && exit 0
-            sleep 10
-          done
-          exit 1
