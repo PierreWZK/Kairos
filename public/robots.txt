@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /espace
+Disallow: /admin
+Disallow: /integration/
+Disallow: /rendez-vous/
+Disallow: /demo/integration
+Disallow: /connexion
+Disallow: /mot-de-passe-oublie
+
+Sitemap: https://kairos.projectp.fr/sitemap.xml

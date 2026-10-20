@@ -2,6 +2,37 @@
 
 {% block title %}Kairos · La prise de rendez-vous en ligne pour votre entreprise{% endblock %}
 {% block description %}Kairos donne à votre entreprise une page de réservation à vos couleurs, à partager en lien ou à intégrer sur votre site. Vos clients réservent seuls, sans créer de compte.{% endblock %}
+{% block meta %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Kairos",
+  "url": "https://kairos.projectp.fr/",
+  "description": "Prise de rendez-vous en ligne pour les entreprises : page de réservation à vos couleurs, intégrable sur votre site, sans compte pour vos clients.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "fr",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "image": "https://kairos.projectp.fr/og.png",
+  "author": {
+    "@type": "Person",
+    "name": "PierreWZK",
+    "url": "https://github.com/PierreWZK"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "ProjectP",
+    "url": "https://projectp.fr/"
+  }
+}
+</script>
+{% endblock %}
 
 {# Aperçu statique de l'agenda : 'free' libre, 'taken' déjà réservé, 'picked' choisi par le visiteur #}
 {% set week = [

@@ -17,6 +17,9 @@
         <meta property="og:image:height" content="630">
         <meta property="og:image:alt" content="Kairos · aperçu du site">
         <meta name="twitter:card" content="summary_large_image">
+        {% if app.request.attributes.get('_route') %}
+            <link rel="canonical" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}">
+        {% endif %}
         {% block meta %}{% endblock %}
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230f5c56%22/><circle cx=%2216%22 cy=%2216%22 r=%229%22 fill=%22none%22 stroke=%22%23f4ede1%22 stroke-width=%222.5%22/><path d=%22M16 10v6l4 3%22 fill=%22none%22 stroke=%22%23e9a23b%22 stroke-width=%222.5%22 stroke-linecap=%22round%22/></svg>">
         <link rel="preconnect" href="https://fonts.googleapis.com">
