@@ -8,7 +8,9 @@
 #   /app/public/uploads   logos des entreprises
 #   /app/var/share        sessions, cache de l'appli, compteurs des limites
 # ---------------------------------------------------------------------------
-FROM dunglas/frankenphp:1-php8.4
+# Version exacte de PHP : elle garantit que l'image corrigée est bien utilisée (PHP2Shell, corrigé en 8.4.27).
+# À chaque correctif de sécurité de PHP 8.4, monter ce numéro.
+FROM dunglas/frankenphp:1-php8.4.27
 
 WORKDIR /app
 
