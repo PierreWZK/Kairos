@@ -1,8 +1,14 @@
 # Kairos · Réserver le bon moment
 
-> Jour 05 du défi **30 jours, 30 projets** · Symfony 8, Twig, Doctrine, EasyAdmin 5, MySQL · 🟢 **En ligne : [kairos.projectp.fr](https://kairos.projectp.fr)**
+🌐 **[kairos.projectp.fr](https://kairos.projectp.fr/)** · Jour 05 du défi **[30 jours, 30 projets](https://projectp.fr/)** · [Dépôt du défi](https://github.com/PierreWZK/30DaysProjects)
 
-![Page d'accueil de Kairos](docs/preview.png)
+Stack : Symfony 8, Twig, Doctrine, EasyAdmin 5, MySQL.
+
+[![Page d'accueil de Kairos](docs/preview-accueil.png)](https://kairos.projectp.fr/)
+
+<p align="center">
+  <img src="docs/preview-mobile.png" alt="Kairos sur téléphone" width="260">
+</p>
 
 Kairos est une plateforme de **réservation de créneaux en ligne** pour les entreprises de rendez-vous : salons de coiffure, cabinets, coachs, professeurs particuliers… Une entreprise s'inscrit, crée ses calendriers (une personne, une salle, un lieu), et ses clients réservent **sans créer de compte**, sur la page Kairos de l'entreprise ou **directement sur son propre site**.
 
@@ -254,3 +260,14 @@ tests/
 ├── Unit/, Integration/, Functional/
 └── AgendaTestTrait.php                Données de test et heure figée
 ```
+
+---
+
+## Le défi 30 jours, 30 projets
+
+Un projet complet par jour pendant 30 jours, chacun en ligne sur son propre sous-domaine.
+
+- 🗂️ **Tous les projets** : [projectp.fr](https://projectp.fr/)
+- 💻 **Le dépôt du défi** : [github.com/PierreWZK/30DaysProjects](https://github.com/PierreWZK/30DaysProjects)
+- ⬅️ **Jour précédent** : [3logy, hub geek](https://3logy.projectp.fr/)
+- ➡️ **Jour suivant** : [Sursaut, jeu de réflexes](https://sursaut.projectp.fr/)
